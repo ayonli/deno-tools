@@ -12,7 +12,7 @@
             "problemMatcher": "$tsc"
         },
         {
-            "type": "npm", 
+            "type": "npm",
             "script": "compile-tests",
             "group": "build",
             "presentation": {

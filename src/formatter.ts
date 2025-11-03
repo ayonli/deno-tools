@@ -2,9 +2,9 @@ import * as vscode from "vscode"
 import { spawn } from "node:child_process"
 import { promises as fs } from "node:fs"
 import * as path from "node:path"
-import { Buffer } from "node:buffer"
+import type { Buffer } from "node:buffer"
 
-// Supported languages for Deno formatting
+// Supported languages for Deno formatter
 export const SUPPORTED_LANGUAGES = [
     // TypeScript variants
     { scheme: "file", language: "typescript" },
@@ -25,6 +25,12 @@ export const SUPPORTED_LANGUAGES = [
     { scheme: "file", language: "scss" },
     { scheme: "file", language: "sass" },
     { scheme: "file", language: "less" },
+    // Vue
+    { scheme: "file", language: "vue" },
+    // Svelte
+    { scheme: "file", language: "svelte" },
+    // Astro
+    { scheme: "file", language: "astro" },
     // SQL
     { scheme: "file", language: "sql" },
 ] as const
@@ -42,7 +48,7 @@ export class DenoDocumentFormattingEditProvider implements vscode.DocumentFormat
 
             return this.createTextEdit(document, formattedText)
         } catch (error) {
-            console.error(`Error running deno fmt: ${error}`)
+            console.error(`Deno formatter error: ${error}`)
             throw error
         }
     }
@@ -82,6 +88,9 @@ export class DenoDocumentFormattingEditProvider implements vscode.DocumentFormat
             "yml",
             "yaml",
             "sql",
+            "vue",
+            "svelte",
+            "astro",
             "vto",
             "njk",
             // Note: ipynb (Jupyter notebooks) also supported
@@ -106,6 +115,9 @@ export class DenoDocumentFormattingEditProvider implements vscode.DocumentFormat
             sass: "sass",
             less: "less",
             sql: "sql",
+            vue: "vue",
+            svelte: "svelte",
+            astro: "astro",
         }
 
         return languageMap[languageId] || "ts"

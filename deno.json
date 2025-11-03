@@ -25,7 +25,9 @@
             "node_modules"
         ],
         "rules": {
-            "tags": ["recommended"]
+            "tags": [
+                "recommended"
+            ]
         }
     }
 }

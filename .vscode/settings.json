@@ -1,0 +1,4 @@
+{
+    "deno-tools.formatter.enabled": true,
+    "deno-tools.linter.enabled": true
+}
