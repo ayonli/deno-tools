@@ -60,15 +60,19 @@
         "configuration": {
             "title": "Deno Tools",
             "properties": {
-                "deno-tools.formatter.enabled": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Enable Deno formatting for supported file types"
-                },
-                "deno-tools.linter.enabled": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Enable Deno linting for TypeScript and JavaScript files"
+                "deno-tools.enable": {
+                    "type": [
+                        "boolean",
+                        "array"
+                    ],
+                    "description": "Enable Deno tools. Can be true (all tools), false (no tools), or an array of specific tools: ['formatter', 'linter']. When unset, automatically enables if deno.json/deno.jsonc is found in the project or user's home directory.",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "formatter",
+                            "linter"
+                        ]
+                    }
                 },
                 "deno-tools.linter.lintOnChange": {
                     "type": "boolean",
@@ -81,20 +85,15 @@
                     "minimum": 500,
                     "maximum": 10000,
                     "description": "Debounce delay in milliseconds for linting after document changes (higher values = less interruption while typing)"
+                },
+                "deno-tools.linter.debug": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable debug mode for the linter - prints detailed diagnostic information to the output channel"
                 }
             }
         },
         "commands": [
-            {
-                "command": "deno-tools.toggleFormatter",
-                "title": "Toggle Deno Formatter",
-                "category": "Deno Tools"
-            },
-            {
-                "command": "deno-tools.toggleLinting",
-                "title": "Toggle Deno Linter",
-                "category": "Deno Tools"
-            },
             {
                 "command": "deno-tools.fixCurrentFile",
                 "title": "Fix Current File",
@@ -104,11 +103,11 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run package",
-        "compile": "npm run check-types && npm run lint && node esbuild.js",
+        "compile": "npm run check-types && npm run lint && deno run -A esbuild.ts",
         "watch": "npm-run-all -p watch:*",
-        "watch:esbuild": "node esbuild.js --watch",
+        "watch:esbuild": "deno run -A esbuild.ts --watch",
         "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
-        "package": "npm run check-types && npm run lint && node esbuild.js --production",
+        "package": "npm run check-types && npm run lint && deno run -A esbuild.ts --production",
         "compile-tests": "tsc -p . --outDir out",
         "watch-tests": "tsc -p . -w --outDir out",
         "pretest": "npm run compile-tests && npm run compile",
@@ -126,8 +125,13 @@
         "@types/vscode": "~1.97.0",
         "@vscode/test-cli": "^0.0.11",
         "@vscode/test-electron": "^2.5.2",
-        "esbuild": "^0.25.10",
+        "esbuild": "^0.25.12",
         "npm-run-all": "^4.1.5",
         "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "@ayonli/jsext": "^1.9.0",
+        "@std/jsonc": "npm:@jsr/std__jsonc@^1.0.2",
+        "minimatch": "^10.1.1"
     }
 }

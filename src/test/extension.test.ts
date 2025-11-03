@@ -1,16 +1,16 @@
 import * as assert from "assert"
 import * as vscode from "vscode"
 import * as path from "node:path"
-import { DenoDocumentFormattingEditProvider, SUPPORTED_LANGUAGES } from "../formatter.ts"
+import { DocumentFormattingEditProvider, SUPPORTED_LANGUAGES } from "../formatter.ts"
 
 suite("Deno Rules Extension Test Suite", () => {
     vscode.window.showInformationMessage("Running Deno Rules tests...")
 
     suite("Formatter Tests", () => {
-        let formatter: DenoDocumentFormattingEditProvider
+        let formatter: DocumentFormattingEditProvider
 
-        setup(() => {
-            formatter = new DenoDocumentFormattingEditProvider()
+        beforeEach(() => {
+            formatter = new DocumentFormattingEditProvider()
         })
 
         test("SUPPORTED_LANGUAGES contains expected languages", () => {

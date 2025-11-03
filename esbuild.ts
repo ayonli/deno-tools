@@ -1,15 +1,11 @@
 import process from "node:process"
-import esbuild from "esbuild"
+import { context, Plugin } from "esbuild"
 
 const production = process.argv.includes("--production")
 const watch = process.argv.includes("--watch")
 
-/**
- * @type {import('esbuild').Plugin}
- */
-const esbuildProblemMatcherPlugin = {
+const esbuildProblemMatcherPlugin: Plugin = {
     name: "esbuild-problem-matcher",
-
     setup(build) {
         build.onStart(() => {
             console.log("[watch] build started")
@@ -17,7 +13,9 @@ const esbuildProblemMatcherPlugin = {
         build.onEnd((result) => {
             result.errors.forEach(({ text, location }) => {
                 console.error(`✘ [ERROR] ${text}`)
-                console.error(`    ${location.file}:${location.line}:${location.column}:`)
+                if (location) {
+                    console.error(`    ${location.file}:${location.line}:${location.column}:`)
+                }
             })
             console.log("[watch] build finished")
         })
@@ -25,7 +23,7 @@ const esbuildProblemMatcherPlugin = {
 }
 
 async function main() {
-    const ctx = await esbuild.context({
+    const ctx = await context({
         entryPoints: [
             "src/extension.ts",
         ],
@@ -39,10 +37,10 @@ async function main() {
         external: ["vscode"],
         logLevel: "silent",
         plugins: [
-            /* add to the end of plugins array */
             esbuildProblemMatcherPlugin,
         ],
     })
+
     if (watch) {
         await ctx.watch()
     } else {
@@ -51,7 +49,11 @@ async function main() {
     }
 }
 
-main().catch((e) => {
-    console.error(e)
-    process.exit(1)
-})
+if (import.meta.main) {
+    try {
+        await main()
+    } catch (e) {
+        console.error(e)
+        process.exit(1)
+    }
+}

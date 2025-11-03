@@ -1,12 +1,12 @@
 import * as assert from "assert"
 import type * as vscode from "vscode"
-import { DenoDocumentFormattingEditProvider } from "../formatter.ts"
+import { DocumentFormattingEditProvider } from "../formatter.ts"
 
 suite("Formatter Unit Tests", () => {
-    let formatter: DenoDocumentFormattingEditProvider
+    let formatter: DocumentFormattingEditProvider
 
-    setup(() => {
-        formatter = new DenoDocumentFormattingEditProvider()
+    beforeEach(() => {
+        formatter = new DocumentFormattingEditProvider()
     })
 
     suite("Extension Detection Logic", () => {
@@ -20,7 +20,7 @@ suite("Formatter Unit Tests", () => {
             ]
 
             testCases.forEach(({ fileName, expected }) => {
-                const result = getDenoExtensionForTest(formatter, fileName, "typescript")
+                const result = getExtensionForTest(formatter, fileName, "typescript")
                 assert.strictEqual(result, expected, `${fileName} should map to ${expected}`)
             })
         })
@@ -34,7 +34,7 @@ suite("Formatter Unit Tests", () => {
             ]
 
             testCases.forEach(({ fileName, expected }) => {
-                const result = getDenoExtensionForTest(formatter, fileName, "javascript")
+                const result = getExtensionForTest(formatter, fileName, "javascript")
                 assert.strictEqual(result, expected, `${fileName} should map to ${expected}`)
             })
         })
@@ -46,14 +46,14 @@ suite("Formatter Unit Tests", () => {
             ]
 
             testCases.forEach(({ fileName, expected }) => {
-                const result = getDenoExtensionForTest(formatter, fileName, "yaml")
+                const result = getExtensionForTest(formatter, fileName, "yaml")
                 assert.strictEqual(result, expected, `${fileName} should map to ${expected}`)
             })
         })
 
         test("Should handle unknown extensions with language fallback", () => {
             // Test file without extension or unknown extension
-            const result = getDenoExtensionForTest(formatter, "unknown.xyz", "typescript")
+            const result = getExtensionForTest(formatter, "unknown.xyz", "typescript")
             assert.strictEqual(result, "ts", "Should fallback to language mapping")
         })
 
@@ -67,7 +67,7 @@ suite("Formatter Unit Tests", () => {
             ]
 
             testCases.forEach(({ fileName, expected }) => {
-                const result = getDenoExtensionForTest(formatter, fileName, "css")
+                const result = getExtensionForTest(formatter, fileName, "css")
                 assert.strictEqual(result, expected, `${fileName} should map to ${expected}`)
             })
         })
@@ -81,7 +81,7 @@ suite("Formatter Unit Tests", () => {
             ]
 
             testCases.forEach(({ fileName, expected }) => {
-                const result = getDenoExtensionForTest(formatter, fileName, "json")
+                const result = getExtensionForTest(formatter, fileName, "json")
                 assert.strictEqual(result, expected, `${fileName} should map to ${expected}`)
             })
         })
@@ -107,7 +107,7 @@ suite("Formatter Unit Tests", () => {
             ]
 
             testCases.forEach(({ languageId, expected }) => {
-                const result = getDenoExtensionForTest(formatter, "unknown", languageId)
+                const result = getExtensionForTest(formatter, "unknown", languageId)
                 assert.strictEqual(
                     result,
                     expected,
@@ -117,16 +117,16 @@ suite("Formatter Unit Tests", () => {
         })
 
         test("Should default to ts for unknown language IDs", () => {
-            const result = getDenoExtensionForTest(formatter, "unknown", "unknownlang")
+            const result = getExtensionForTest(formatter, "unknown", "unknown")
             assert.strictEqual(result, "ts", "Unknown language should default to ts")
         })
     })
 })
 
-// Helper function to test the private getDenoExtension method
+// Helper function to test the private getExtension method
 // This uses reflection to access the private method for testing
-function getDenoExtensionForTest(
-    formatter: DenoDocumentFormattingEditProvider,
+function getExtensionForTest(
+    formatter: DocumentFormattingEditProvider,
     fileName: string,
     languageId: string,
 ): string {
@@ -140,5 +140,5 @@ function getDenoExtensionForTest(
     // Note: This is a testing technique to access private methods
     // deno-lint-ignore no-explicit-any
     const formatterAny = formatter as any
-    return formatterAny.getDenoExtension(mockDocument)
+    return formatterAny.getExtension(mockDocument)
 }

@@ -1,12 +1,20 @@
 import * as vscode from "vscode"
-import { spawn } from "node:child_process"
-import { promises as fs } from "node:fs"
-import * as path from "node:path"
-import { Buffer } from "node:buffer"
 import process from "node:process"
 
-// Import fix providers
 import { type FixProvider, getAllFixProviders, getDisableRuleProvider } from "./fixes/index.ts"
+
+import { BaseProvider } from "../base.ts"
+
+interface DenoConfig {
+    fmt?: {
+        include?: string[]
+        exclude?: string[]
+    }
+    lint?: {
+        include?: string[]
+        exclude?: string[]
+    }
+}
 
 // Supported languages for Deno linter
 export const LINTING_SUPPORTED_LANGUAGES = [
@@ -20,7 +28,7 @@ export const LINTING_SUPPORTED_LANGUAGES = [
     { scheme: "file", language: "jsx" },
 ] as const
 
-interface DenoLintMessage {
+interface LintMessage {
     range: {
         start: { line: number; col: number }
         end: { line: number; col: number }
@@ -32,70 +40,129 @@ interface DenoLintMessage {
     docs?: string
 }
 
-export class DenoLintingProvider implements vscode.CodeActionProvider {
+export class LintingProvider extends BaseProvider implements vscode.CodeActionProvider {
     private diagnosticsCollection: vscode.DiagnosticCollection
-    private outputChannel: vscode.OutputChannel
-    private lintingEnabled: boolean = true
     private fixProviders: FixProvider[]
     private disableRuleProvider: FixProvider
+    private lintingTimers: Map<string, NodeJS.Timeout> = new Map()
+    private documentChangeListener?: vscode.Disposable
+    private documentOpenListener?: vscode.Disposable
+    private documentSaveListener?: vscode.Disposable
+    private documentCloseListener?: vscode.Disposable
+    private linterConfigChangeListener?: vscode.Disposable
 
     constructor() {
+        super()
         this.diagnosticsCollection = vscode.languages.createDiagnosticCollection(
             "deno-tools-linter",
         )
-        this.outputChannel = vscode.window.createOutputChannel("Deno Tools")
         this.fixProviders = getAllFixProviders()
         this.disableRuleProvider = getDisableRuleProvider()
     }
 
-    public enable(): void {
-        this.lintingEnabled = true
+    public getSupportedLanguages(): vscode.DocumentFilter[] {
+        return [...LINTING_SUPPORTED_LANGUAGES]
     }
 
-    public disable(): void {
-        this.lintingEnabled = false
+    public getConfigurationSection(): string {
+        return "linter"
+    }
+
+    private isDebugEnabled(): boolean {
+        const config = vscode.workspace.getConfiguration("deno-tools.linter")
+        return config.get<boolean>("debug", false)
+    }
+
+    protected getCommandArgs(document: vscode.TextDocument): string[] {
+        const args = ["lint", "--json"]
+
+        this.addConfigIfFound(args, document)
+
+        const ext = this.getExtension(document)
+        args.push(`--ext=${ext}`, "-")
+
+        return args
+    }
+
+    protected onEnable(): void {
+        this.setupFileWatchers()
+        // Re-lint all open documents
+        vscode.workspace.textDocuments.forEach((document) => {
+            if (this.isSupportedDocument(document)) {
+                this.lintDocument(document)
+            }
+        })
+    }
+
+    protected onDisable(): void {
         this.diagnosticsCollection.clear()
+        // Clear any pending timers when linting is disabled
+        this.lintingTimers.forEach((timer) => clearTimeout(timer))
+        this.lintingTimers.clear()
+    }
+
+    protected onDispose(): void {
+        this.disposeFileWatchers()
+        this.lintingTimers.forEach((timer) => clearTimeout(timer))
+        this.lintingTimers.clear()
+        this.diagnosticsCollection.dispose()
     }
 
     public getDiagnosticsForDocument(document: vscode.TextDocument): readonly vscode.Diagnostic[] {
         return this.diagnosticsCollection.get(document.uri) || []
     }
 
-    public dispose(): void {
-        this.diagnosticsCollection.dispose()
-        this.outputChannel.dispose()
+    public getFileWatcherDisposables(): vscode.Disposable[] {
+        const disposables: vscode.Disposable[] = []
+        if (this.documentChangeListener) { disposables.push(this.documentChangeListener) }
+        if (this.documentOpenListener) { disposables.push(this.documentOpenListener) }
+        if (this.documentSaveListener) { disposables.push(this.documentSaveListener) }
+        if (this.documentCloseListener) { disposables.push(this.documentCloseListener) }
+        if (this.linterConfigChangeListener) { disposables.push(this.linterConfigChangeListener) }
+        return disposables
+    }
+
+    protected override isSupportedDocument(document: vscode.TextDocument): boolean {
+        const isLanguageSupported = document.uri.scheme === "file" &&
+            this.getSupportedLanguages().some((filter) =>
+                filter.language === document.languageId &&
+                (!filter.scheme || filter.scheme === document.uri.scheme)
+            )
+
+        if (!isLanguageSupported) {
+            return false
+        }
+
+        return this.shouldProcessFile(document)
+    }
+
+    /**
+     * Check if a file should be processed based on Deno configuration include/exclude patterns
+     */
+    private shouldProcessFile(document: vscode.TextDocument): boolean {
+        const configPath = this.findDenoConfig(document.uri)
+        if (!configPath) {
+            return true // If no config found, process the file
+        }
+
+        try {
+            const config = this.parseDenoConfig(configPath)
+            return this.matchesIncludeExclude(document.uri, config)
+        } catch {
+            return true
+        }
     }
 
     public async lintDocument(document: vscode.TextDocument): Promise<void> {
-        // Skip non-file documents
-        if (document.uri.scheme !== "file") {
-            return
-        }
-
-        // Skip VS Code internal files and output channels
-        if (
-            document.fileName.includes("extension-output") ||
-            document.fileName.includes("vscode-") ||
-            document.languageId === "Log" ||
-            document.languageId === "log" ||
-            document.fileName.includes("#")
-        ) {
-            return
-        }
-
-        if (!this.lintingEnabled) {
-            return
-        }
-
-        if (!this.isLintingSupported(document)) {
+        if (!this.enabled || !this.isSupportedDocument(document)) {
             return
         }
 
         try {
-            const diagnostics = await this.runDenoLint(document)
+            const diagnostics = await this.runLint(document)
             this.diagnosticsCollection.set(document.uri, diagnostics)
 
-            if (diagnostics.length > 0) {
+            if (diagnostics.length > 0 && !this.isDebugEnabled()) {
                 this.outputChannel.appendLine(
                     `Found ${diagnostics.length} lint issues in ${document.fileName}`,
                 )
@@ -103,145 +170,33 @@ export class DenoLintingProvider implements vscode.CodeActionProvider {
         } catch (error) {
             this.outputChannel.appendLine(`Deno linter failed: ${error}`)
             this.outputChannel.show()
-            vscode.window.showErrorMessage(`Deno linter failed: ${error}`)
             this.diagnosticsCollection.clear()
         }
     }
 
-    private isLintingSupported(document: vscode.TextDocument): boolean {
-        return LINTING_SUPPORTED_LANGUAGES.some(
-            (lang) => lang.language === document.languageId,
-        )
-    }
-
-    private async runDenoLint(document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
-        const text = document.getText()
-        const args = await this.buildDenoLintArgs(document)
-
+    private async runLint(document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
         // Get the workspace folder for proper working directory
         const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri)
         const cwd = workspaceFolder ? workspaceFolder.uri.fsPath : process.cwd()
-
-        const denoProcess = spawn("deno", args, { cwd })
-        const { stdout, stderr } = await this.executeProcess(denoProcess, text)
+        const { stdout, stderr } = await this.executeCommand(document, { cwd })
 
         if (stderr && !stdout) {
-            throw new Error(`Deno lint error: ${stderr}`)
+            throw new Error(stderr)
+        } else if (this.isDebugEnabled()) {
+            this.outputChannel.appendLine(stdout)
         }
 
         return this.parseLintOutput(stdout, document)
     }
 
-    private async buildDenoLintArgs(document: vscode.TextDocument): Promise<string[]> {
-        const args = ["lint", "--json"]
-
-        await this.addConfigIfFound(args, document)
-
-        args.push("-")
-        return args
-    }
-
-    private async findDenoConfig(
-        documentUri: vscode.Uri,
-    ): Promise<string | null> {
-        const workspaceFolder = vscode.workspace.getWorkspaceFolder(documentUri)
-        if (!workspaceFolder) {
-            return null
-        }
-
-        const currentDir = path.dirname(documentUri.fsPath)
-        const workspaceRoot = workspaceFolder.uri.fsPath
-
-        return await this.searchConfigInDirectories(currentDir, workspaceRoot)
-    }
-
-    private async searchConfigInDirectories(
-        startDir: string,
-        rootDir: string,
-    ): Promise<string | null> {
-        let currentDir = startDir
-
-        while (currentDir.startsWith(rootDir)) {
-            const configPath = await this.findConfigInDirectory(currentDir)
-            if (configPath) {
-                return configPath
-            }
-
-            const parentDir = path.dirname(currentDir)
-            if (parentDir === currentDir) {
-                break // Reached filesystem root
-            }
-            currentDir = parentDir
-        }
-
-        return null
-    }
-
-    private async findConfigInDirectory(
-        directory: string,
-    ): Promise<string | null> {
-        const configNames = ["deno.json", "deno.jsonc"]
-
-        for (const configName of configNames) {
-            const configPath = path.join(directory, configName)
-            if (await this.fileExists(configPath)) {
-                return configPath
-            }
-        }
-
-        return null
-    }
-
-    private async fileExists(filePath: string): Promise<boolean> {
-        try {
-            await fs.access(filePath)
-            return true
-        } catch {
-            return false
-        }
-    }
-
-    private async addConfigIfFound(
+    private addConfigIfFound(
         args: string[],
         document: vscode.TextDocument,
-    ): Promise<void> {
-        const configPath = await this.findDenoConfig(document.uri)
+    ): void {
+        const configPath = this.findDenoConfig(document.uri)
         if (configPath) {
             args.push("--config", configPath)
         }
-    }
-
-    private executeProcess(
-        denoProcess: ReturnType<typeof spawn>,
-        input: string,
-    ): Promise<{ stdout: string; stderr: string }> {
-        return new Promise((resolve, reject) => {
-            const stdoutChunks: Buffer[] = []
-            const stderrChunks: Buffer[] = []
-
-            denoProcess.stdout?.on("data", (data) => {
-                stdoutChunks.push(Buffer.from(data))
-            })
-
-            denoProcess.stderr?.on("data", (data) => {
-                stderrChunks.push(Buffer.from(data))
-            })
-
-            denoProcess.on("error", (error) => {
-                reject(error)
-            })
-
-            denoProcess.on("close", (_code) => {
-                const stdout = Buffer.concat(stdoutChunks).toString()
-                const stderr = Buffer.concat(stderrChunks).toString()
-                resolve({ stdout, stderr })
-            })
-
-            if (denoProcess.stdin) {
-                denoProcess.stdin.write(input)
-                denoProcess.stdin.end()
-            }
-        })
     }
 
     private parseLintOutput(output: string, document: vscode.TextDocument): vscode.Diagnostic[] {
@@ -251,11 +206,12 @@ export class DenoLintingProvider implements vscode.CodeActionProvider {
 
         try {
             const result = JSON.parse(output)
-            const diagnostics = result.diagnostics || []
+            const diagnostics: LintMessage[] = result.diagnostics || []
 
-            return diagnostics.map((msg: DenoLintMessage) =>
-                this.convertToDiagnostic(msg, document)
-            )
+            return diagnostics.map((msg) => {
+                msg.docs ??= "https://docs.deno.com/lint/rules/" + msg.code
+                return msg
+            }).map((msg) => this.convertToDiagnostic(msg, document))
         } catch (error) {
             this.outputChannel.appendLine(`Failed to parse Deno lint output: ${error}`)
             throw new Error(`Failed to parse Deno lint output: ${error}`)
@@ -263,7 +219,7 @@ export class DenoLintingProvider implements vscode.CodeActionProvider {
     }
 
     private convertToDiagnostic(
-        msg: DenoLintMessage,
+        msg: LintMessage,
         document: vscode.TextDocument,
     ): vscode.Diagnostic {
         // Convert Deno positions to VS Code positions
@@ -304,14 +260,31 @@ export class DenoLintingProvider implements vscode.CodeActionProvider {
         diagnostic.code = msg.code
         diagnostic.source = "deno-lint"
 
-        // Add hint as related information
-        if (msg.hint) {
-            diagnostic.relatedInformation = [
-                new vscode.DiagnosticRelatedInformation(
-                    new vscode.Location(document.uri, range),
-                    `Hint: ${msg.hint}`,
-                ),
-            ]
+        // Add hint and documentation link as related information
+        if (msg.hint || msg.docs) {
+            const relatedInfo: vscode.DiagnosticRelatedInformation[] = []
+
+            // Add hint if available
+            if (msg.hint) {
+                relatedInfo.push(
+                    new vscode.DiagnosticRelatedInformation(
+                        new vscode.Location(document.uri, range),
+                        `💡 ${msg.hint}`,
+                    ),
+                )
+            }
+
+            // Add documentation link if available
+            if (msg.docs) {
+                relatedInfo.push(
+                    new vscode.DiagnosticRelatedInformation(
+                        new vscode.Location(document.uri, range),
+                        `📖 ${msg.docs}`,
+                    ),
+                )
+            }
+
+            diagnostic.relatedInformation = relatedInfo
         }
 
         return diagnostic
@@ -335,42 +308,11 @@ export class DenoLintingProvider implements vscode.CodeActionProvider {
         const regularActions: vscode.CodeAction[] = []
         const disableActions: vscode.CodeAction[] = []
 
-        // Debug logging (remove in production)
-        console.log(
-            `🎯 CODE ACTIONS: Range: ${range.start.line}:${range.start.character}-${range.end.line}:${range.end.character}, isEmpty: ${range.isEmpty}`,
-        )
-        console.log(`📋 CODE ACTIONS: ${context.diagnostics.length} diagnostics in context:`)
-        context.diagnostics.forEach((d) => {
-            console.log(
-                `  - ${d.code}: ${d.range.start.line}:${d.range.start.character}-${d.range.end.line}:${d.range.end.character} "${d.message}"`,
-            )
-        })
-
         // Filter and prioritize diagnostics based on relevance to the current range
         const relevantDiagnostics = this.filterAndPrioritizeDiagnostics(
             context.diagnostics,
             range,
         )
-
-        console.log(
-            `✅ CODE ACTIONS: ${relevantDiagnostics.length} relevant diagnostics after filtering:`,
-        )
-        relevantDiagnostics.forEach((d) => {
-            console.log(
-                `  - Selected: ${d.code} (${d.range.start.line}:${d.range.start.character}-${d.range.end.line}:${d.range.end.character}) "${d.message}"`,
-            )
-        })
-
-        if (
-            relevantDiagnostics.length !==
-                context.diagnostics.filter((d) => d.source === "deno-lint").length
-        ) {
-            console.log(
-                `🔄 CODE ACTIONS: Filtered from ${
-                    context.diagnostics.filter((d) => d.source === "deno-lint").length
-                } to ${relevantDiagnostics.length} diagnostics`,
-            )
-        }
 
         // Process each relevant diagnostic
         for (const diagnostic of relevantDiagnostics) {
@@ -464,5 +406,94 @@ export class DenoLintingProvider implements vscode.CodeActionProvider {
         }
         // For multi-line ranges, approximate size
         return lines * 100 + (range.end.character - range.start.character)
+    }
+
+    private setupFileWatchers(): void {
+        this.disposeFileWatchers()
+
+        const config = vscode.workspace.getConfiguration("deno-tools")
+        const debounceMs = config.get<number>("linter.debounceMs", 1500)
+
+        // Set up document change listeners for real-time linting
+        this.documentChangeListener = vscode.workspace.onDidChangeTextDocument((event) => {
+            // Only process actual files, not output channels or internal VS Code documents
+            if (this.isSupportedDocument(event.document)) {
+                const documentKey = event.document.uri.toString()
+
+                if (
+                    event.document &&
+                    this.enabled &&
+                    config.get<boolean>("linter.lintOnChange", true)
+                ) {
+                    // Clear any existing timer for this document
+                    const existingTimer = this.lintingTimers.get(documentKey)
+                    if (existingTimer) {
+                        clearTimeout(existingTimer)
+                    }
+
+                    // Set up new debounced linting timer
+                    const timer = setTimeout(() => {
+                        this.lintDocument(event.document)
+                        this.lintingTimers.delete(documentKey)
+                    }, debounceMs)
+
+                    this.lintingTimers.set(documentKey, timer)
+                }
+            }
+        })
+
+        // Lint document when opened
+        this.documentOpenListener = vscode.workspace.onDidOpenTextDocument((document) => {
+            if (this.isSupportedDocument(document) && this.enabled) {
+                this.lintDocument(document)
+            }
+        })
+
+        // Lint document when saved (immediate, no debounce)
+        this.documentSaveListener = vscode.workspace.onDidSaveTextDocument((document) => {
+            if (this.enabled && this.isSupportedDocument(document)) {
+                // Clear any pending timer since we're linting immediately on save
+                const documentKey = document.uri.toString()
+                const existingTimer = this.lintingTimers.get(documentKey)
+                if (existingTimer) {
+                    clearTimeout(existingTimer)
+                    this.lintingTimers.delete(documentKey)
+                }
+
+                this.lintDocument(document)
+            }
+        })
+
+        // Clean up timers and diagnostics when documents are closed
+        this.documentCloseListener = vscode.workspace.onDidCloseTextDocument((document) => {
+            const documentKey = document.uri.toString()
+            const existingTimer = this.lintingTimers.get(documentKey)
+            if (existingTimer) {
+                clearTimeout(existingTimer)
+                this.lintingTimers.delete(documentKey)
+            }
+
+            // Clear diagnostics for the closed document
+            this.diagnosticsCollection.delete(document.uri)
+        })
+
+        // Listen for linter-specific configuration changes
+        this.linterConfigChangeListener = vscode.workspace.onDidChangeConfiguration((event) => {
+            if (
+                event.affectsConfiguration("deno-tools.linter.lintOnChange") ||
+                event.affectsConfiguration("deno-tools.linter.debounceMs")
+            ) {
+                // Refresh file watchers with new configuration
+                this.setupFileWatchers()
+            }
+        })
+    }
+
+    private disposeFileWatchers(): void {
+        this.documentChangeListener?.dispose()
+        this.documentOpenListener?.dispose()
+        this.documentSaveListener?.dispose()
+        this.documentCloseListener?.dispose()
+        this.linterConfigChangeListener?.dispose()
     }
 }

@@ -10,45 +10,47 @@ Deno Tools is a lightweight VS Code extension that provides Deno's powerful form
 
 ## ✨ Features
 
-### 🎨 **Smart Code Formatting**
+### ⚙️ **Deno Configuration**
 
-- **Built-in Integration**: Format documents using VS Code's standard formatting commands (Format Document, Format Selection)
-- **Automatic Configuration**: Respects `deno.json` and `deno.jsonc` configuration files
-- **Multi-Language Support**: Supports TypeScript, JavaScript, JSX, TSX, JSON, JSONC, Markdown, HTML, CSS, SCSS, Sass, Less, Vue, Svelte, Astro, YAML, and SQL
-- **Format on Save**: Works seamlessly with VS Code's format-on-save feature
+This extension respects `deno.json` or `deno.jsonc` configuration files; automatically finds them
+in your project hierarchy and falls back to the user's home directory.
 
-### 🔍 **Advanced Linting**
+### 🎨 **Code Formatting**
 
-- **Real-time Diagnostics**: Live linting with configurable debouncing to avoid interruption while typing
-- **Smart Configuration**: Automatically finds and uses `deno.json`/`deno.jsonc` config files in your project hierarchy
-- **Auto-fixes**: Intelligent code fixes with the "Fix Current File" command
-- **Comprehensive Rules**: Supports all Deno lint rules with detailed diagnostics and helpful hints
+- **Built-in Integration**: Format documents using VS Code's standard formatting functionalities (Format Document, Format Selection, Format on Save, etc.).
+- **Multi-Language Support**: Supports TypeScript, JavaScript, JSX, TSX, JSON, JSONC, Markdown, HTML, CSS, SCSS, Sass, Less, Vue, Svelte, Astro, YAML, and SQL.
 
-### 🛠 **Developer-Friendly Commands**
+### 🔍 **Linting**
 
-- **Toggle Formatter**: Quickly enable/disable Deno formatting (`Deno Tools: Toggle Deno Formatter`)
-- **Toggle Linter**: Quickly enable/disable Deno linting (`Deno Tools: Toggle Deno Linter`)
-- **Fix Current File**: Apply all available auto-fixes to the current file (`Deno Tools: Fix Current File`)
+- **Real-time Diagnostics**: Live linting with detailed diagnostics and helpful hints.
+- **Auto-fixes**: Quick fix actions for various rules.
+
+### 🛠 **Commands**
+
+- **Fix Current File**: Apply all available auto-fixes to the current file (`Deno Tools: Fix Current File`).
 
 ## 🚀 Quick Start
 
-1. **Install Deno**: Make sure [Deno](https://deno.land/) is installed on your system
-2. **Install Extension**: Install "Deno Tools" from the VS Code marketplace
-3. **Start Coding**: The extension automatically activates when you open supported file types
+1. **Install Deno**: Make sure [Deno](https://deno.land/) is installed on your system.
+2. **Install Extension**: Install "Deno Tools" from the VS Code marketplace.
+3. **Create Deno Config**: Add a `deno.json` or `deno.jsonc` file to your project root (the extension auto-enables when these files are found).
+4. **Start Coding**: The extension automatically activates for supported file types in Deno projects.
 
 ### Basic Usage
 
 ```typescript
 // Open any TypeScript/JavaScript file
-// Use Ctrl+Shift+I (Cmd+Shift+I on macOS) to format
+// Use Shift+Alt+F (Windows/Linux) or Shift+Option+F (macOS) to format
 // Linting diagnostics appear automatically as you type
 
 // Create a deno.json file for custom configuration:
 {
   "fmt": {
     "lineWidth": 100,
-    "indentWidth": 2,
-    "singleQuote": true
+    "indentWidth": 4,
+    "singleQuote": false,
+    "semiColons": false,
+    "proseWrap": "preserve"
   },
   "lint": {
     "rules": {
@@ -62,40 +64,54 @@ Deno Tools is a lightweight VS Code extension that provides Deno's powerful form
 
 This extension provides several configuration options accessible via VS Code settings:
 
-| Setting                          | Default | Description                                                                |
-| -------------------------------- | ------- | -------------------------------------------------------------------------- |
-| `deno-tools.formatter.enabled`   | `true`  | Enable Deno formatting for supported file types                            |
-| `deno-tools.linter.enabled`      | `true`  | Enable Deno linting for TypeScript and JavaScript files                    |
-| `deno-tools.linter.lintOnChange` | `true`  | Enable linting while typing (disable to only lint on save/manual triggers) |
-| `deno-tools.linter.debounceMs`   | `1500`  | Debounce delay in milliseconds for linting after document changes          |
+| Setting                          | Default     | Description                                                                                                                                                                                           |
+| -------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `deno-tools.enable`              | Auto-detect | Enable Deno tools. Can be `true` (all), `false` (none), or `["formatter", "linter"]`. When unset, automatically enables if `deno.json`/`deno.jsonc` is found in the project or user's home directory. |
+| `deno-tools.linter.lintOnChange` | `true`      | Enable linting while typing (disable to only lint on save/manual triggers)                                                                                                                            |
+| `deno-tools.linter.debounceMs`   | `1500`      | Debounce delay in milliseconds for linting after document changes                                                                                                                                     |
 
-### Deno Configuration
+### Configuration Examples
 
-The extension automatically detects and uses your project's Deno configuration:
-
-- Searches for `deno.json` or `deno.jsonc` files
-- Starts from the current file's directory and searches up to the workspace root
-- Respects all Deno formatting and linting configuration options
-
-Example `deno.json`:
+**Auto-detection (default behavior):**
 
 ```json
 {
-    "fmt": {
-        "lineWidth": 120,
-        "indentWidth": 4,
-        "semiColons": false,
-        "singleQuote": true,
-        "proseWrap": "preserve"
-    },
-    "lint": {
-        "include": ["src/"],
-        "exclude": ["build/", "dist/"],
-        "rules": {
-            "tags": ["recommended"],
-            "exclude": ["no-unused-vars"]
-        }
-    }
+    // No deno-tools.enable setting
+    // Extension automatically enables if deno.json/deno.jsonc is found in:
+    // 1. Project directory (searches up the tree)
+    // 2. User's home directory (as fallback)
+}
+```
+
+**Explicitly enable all tools:**
+
+```json
+{
+    "deno-tools.enable": true
+}
+```
+
+**Disable all tools:**
+
+```json
+{
+    "deno-tools.enable": false
+}
+```
+
+**Enable only the formatter:**
+
+```json
+{
+    "deno-tools.enable": ["formatter"]
+}
+```
+
+**Enable only the linter:**
+
+```json
+{
+    "deno-tools.enable": ["linter"]
 }
 ```
 
@@ -119,38 +135,37 @@ Example `deno.json`:
 
 Access these commands via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):
 
-| Command                             | Description                                        |
-| ----------------------------------- | -------------------------------------------------- |
-| `Deno Tools: Toggle Deno Formatter` | Enable or disable Deno formatting                  |
-| `Deno Tools: Toggle Deno Linter`    | Enable or disable Deno linting                     |
-| `Deno Tools: Fix Current File`      | Apply all available auto-fixes to the current file |
+| Command                        | Description                                        |
+| ------------------------------ | -------------------------------------------------- |
+| `Deno Tools: Fix Current File` | Apply all available auto-fixes to the current file |
 
 ## 📝 Usage Tips
 
 ### Formatting
 
-- Use standard VS Code formatting shortcuts: `Shift+Alt+F` (Windows/Linux) or `Shift+Option+F` (macOS)
-- Right-click and select "Format Document" or "Format Selection"
-- Enable "Format on Save" in VS Code settings for automatic formatting
+- Use standard VS Code formatting shortcuts: `Shift+Alt+F` (Windows/Linux) or `Shift+Option+F` (macOS).
+- Right-click and select "Format Document" or "Format Selection".
+- Enable "Format on Save" in VS Code settings for automatic formatting.
 
 ### Linting
 
-- Diagnostics appear automatically as you type (with configurable debouncing)
-- Hover over underlined issues to see detailed information and quick fixes
-- Use "Fix Current File" to apply all available auto-fixes at once
-- Linting respects your `deno.json` configuration for included/excluded files and rules
+- Diagnostics appear automatically as you type (with configurable debouncing).
+- Hover over underlined issues to see detailed information and quick fixes.
+- Use "Fix Current File" to apply all available auto-fixes at once.
+- Linting respects your `deno.json` configuration for included/excluded files and rules.
+- Only works with TypeScript and JavaScript files.
 
 ### Performance
 
-- Adjust `deno-tools.linter.debounceMs` if linting feels too intrusive while typing
-- Disable `deno-tools.linter.lintOnChange` to only lint on save and manual triggers
-- The extension is lightweight and doesn't include the full Deno LSP overhead
+- Adjust `deno-tools.linter.debounceMs` if linting feels too intrusive while typing.
+- Disable `deno-tools.linter.lintOnChange` to only lint on save and manual triggers.
+- The extension is lightweight and doesn't include the full Deno LSP overhead.
 
 ## 🔧 Requirements
 
-- **Deno**: Must be installed and available in your system PATH
-- **VS Code**: Version 1.97.0 or higher
-- **Operating System**: Windows, macOS, or Linux
+- **Deno**: Must be installed and available in your system PATH.
+- **VS Code**: Version 1.97.0 or higher.
+- **Operating System**: Windows, macOS, or Linux.
 
 ## 🆚 Comparison with Deno LSP
 
@@ -168,38 +183,15 @@ Access these commands via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):
 
 **Choose Deno Tools when:**
 
-- You want lightweight Deno tooling without LSP overhead
-- You're using other TypeScript language servers
-- You only need formatting and linting capabilities
-- You want simple, zero-configuration setup
-- You need compatibility with older VS Code versions (1.97.0+)
+- You want lightweight Deno tooling without LSP overhead.
+- You're using other TypeScript language servers, like the builtin one.
+- You only need formatting and linting capabilities.
+- You want simple, zero-configuration setup.
 
 **Choose Deno LSP when:**
 
-- You need full TypeScript IntelliSense and type checking
-- You're building a pure Deno project
-- You need advanced Deno-specific features like import maps
-
-## 🐛 Known Issues
-
-- **Deno Installation Required**: The extension requires Deno to be installed and accessible via PATH
-- **Large File Performance**: Very large files (>10MB) may experience slower formatting/linting
-- **Windows Path Issues**: Ensure Deno is properly added to your Windows PATH environment variable
-
-## 📦 Installation
-
-### From VS Code Marketplace
-
-1. Open VS Code
-2. Go to Extensions (`Ctrl+Shift+X`)
-3. Search for "Deno Tools"
-4. Click Install
-
-### From Command Line
-
-```bash
-code --install-extension ayonli.deno-tools
-```
+- You're building a pure Deno project.
+- You need advanced Deno-specific features like import maps and Deno APIs.
 
 ## 🤝 Contributing
 
