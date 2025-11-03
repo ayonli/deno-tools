@@ -1,0 +1,88 @@
+{
+    "name": "deno-rules",
+    "displayName": "Deno Rules",
+    "description": "Format TypeScript, JavaScript, JSON, YAML, Markdown, HTML, CSS, and more using Deno's formatter.",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.105.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onLanguage:typescript",
+        "onLanguage:typescriptreact",
+        "onLanguage:javascript",
+        "onLanguage:javascriptreact",
+        "onLanguage:json",
+        "onLanguage:jsonc",
+        "onLanguage:yaml",
+        "onLanguage:markdown",
+        "onLanguage:html",
+        "onLanguage:css",
+        "onLanguage:scss",
+        "onLanguage:sass",
+        "onLanguage:less",
+        "onLanguage:sql"
+    ],
+    "main": "./dist/extension.js",
+    "contributes": {
+        "configuration": {
+            "title": "Deno Rules",
+            "properties": {
+                "denoRules.linting.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable Deno linting for TypeScript and JavaScript files"
+                },
+                "denoRules.linting.debounceMs": {
+                    "type": "number",
+                    "default": 500,
+                    "minimum": 100,
+                    "maximum": 5000,
+                    "description": "Debounce delay in milliseconds for linting after document changes"
+                }
+            }
+        },
+        "commands": [
+            {
+                "command": "denoRules.toggleLinting",
+                "title": "Toggle Deno Linting",
+                "category": "Deno Rules"
+            },
+            {
+                "command": "denoRules.lintCurrentFile",
+                "title": "Lint Current File",
+                "category": "Deno Rules"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run package",
+        "compile": "npm run check-types && npm run lint && node esbuild.js",
+        "watch": "npm-run-all -p watch:*",
+        "watch:esbuild": "node esbuild.js --watch",
+        "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+        "package": "npm run check-types && npm run lint && node esbuild.js --production",
+        "compile-tests": "tsc -p . --outDir out",
+        "watch-tests": "tsc -p . -w --outDir out",
+        "pretest": "npm run compile-tests && npm run compile",
+        "check-types": "tsc --noEmit",
+        "lint": "deno lint src/",
+        "fmt": "deno fmt src/",
+        "fmt:check": "deno fmt --check src/",
+        "test": "vscode-test",
+        "test:unit": "echo 'Unit tests would run here - requires VS Code test environment'",
+        "test:skip": "echo 'Tests skipped - use npm run test for full VS Code integration tests'"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.105.0",
+        "@types/mocha": "^10.0.10",
+        "@types/node": "22.x",
+        "esbuild": "^0.25.10",
+        "npm-run-all": "^4.1.5",
+        "typescript": "^5.9.3",
+        "@vscode/test-cli": "^0.0.11",
+        "@vscode/test-electron": "^2.5.2"
+    }
+}

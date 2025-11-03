@@ -1,0 +1,9 @@
+# Test YAML file with .yml extension
+name: my-project
+version: 1.0.0
+dependencies:
+    - lodash
+    - express
+scripts:
+    start: node index.js
+    test: jest
