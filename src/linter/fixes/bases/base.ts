@@ -23,6 +23,8 @@ export interface FixProvider {
     ): vscode.CodeAction[]
 }
 
+const HINT_PREFIX = /^(Hint:|💡) /
+
 /**
  * Base class for fix providers that implements common functionality
  */
@@ -45,10 +47,10 @@ export abstract class BaseFixProvider implements FixProvider {
     protected extractHint(diagnostic: vscode.Diagnostic): string | null {
         if (diagnostic.relatedInformation && diagnostic.relatedInformation.length > 0) {
             const hintInfo = diagnostic.relatedInformation.find((info) =>
-                info.message.startsWith("Hint:")
+                HINT_PREFIX.test(info.message)
             )
             if (hintInfo) {
-                return hintInfo.message.replace("Hint: ", "")
+                return hintInfo.message.replace(HINT_PREFIX, "")
             }
         }
         return null
