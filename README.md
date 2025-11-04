@@ -65,28 +65,28 @@ in your project hierarchy and falls back to the user's home directory.
 
 This extension provides several configuration options accessible via VS Code settings:
 
-| Setting | Default | Description |
-| ------- | ------- | ----------- |
-| `deno-tools.enable`              | Auto-detect | Enable Deno tools. Can be `true` (all tools), `false` (no tools), or an array of specific tools: `['formatter', 'linter']`. |
-| `deno-tools.linter.lintOnChange` | `true`      | Enable linting while typing (disable to only lint on save/manual triggers) |
-| `deno-tools.linter.debounceMs`   | `1500`      | Debounce delay in milliseconds for linting after document changes (higher values = less interruption while typing) |
+| Setting                          | Default     | Description                                                                                                                                |
+| -------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `deno-tools.enable`              | Auto-detect | Enable Deno tools. Can be `true` (all tools), `false` (no tools), or an array of specific tools: `['formatter', 'linter']`.                |
+| `deno-tools.linter.lintOnChange` | `true`      | Enable linting while typing (disable to only lint on save/manual triggers)                                                                 |
+| `deno-tools.linter.debounceMs`   | `1500`      | Debounce delay in milliseconds for linting after document changes (higher values = less interruption while typing)                         |
 | `deno-tools.linter.severity`     | `error`     | Default `error`, set to `warning` or `info` for VS Code to provide informative diagnostics but the rules are not enforced in CI pipelines. |
 
 ## 🎯 Supported Languages
 
 | Language   | Formatter | Linter | File Extensions                   |
-| ---------- | ---------- | ------- | --------------------------------- |
-| TypeScript | ✅         | ✅      | `.ts`, `.tsx`, `.mts`, `.cts`     |
-| JavaScript | ✅         | ✅      | `.js`, `.jsx`, `.mjs`, `.cjs`     |
-| JSON       | ✅         | ❌      | `.json`, `.jsonc`                 |
-| Markdown   | ✅         | ❌      | `.md`                             |
-| HTML       | ✅         | ❌      | `.html`                           |
-| CSS        | ✅         | ❌      | `.css`, `.scss`, `.sass`, `.less` |
-| Vue        | ✅         | ❌      | `.vue`                            |
-| Svelte     | ✅         | ❌      | `.svelte`                         |
-| Astro      | ✅         | ❌      | `.astro`                          |
-| YAML       | ✅         | ❌      | `.yml`, `.yaml`                   |
-| SQL        | ✅         | ❌      | `.sql`                            |
+| ---------- | --------- | ------ | --------------------------------- |
+| TypeScript | ✅        | ✅     | `.ts`, `.tsx`, `.mts`, `.cts`     |
+| JavaScript | ✅        | ✅     | `.js`, `.jsx`, `.mjs`, `.cjs`     |
+| JSON       | ✅        | ❌     | `.json`, `.jsonc`                 |
+| Markdown   | ✅        | ❌     | `.md`                             |
+| HTML       | ✅        | ❌     | `.html`                           |
+| CSS        | ✅        | ❌     | `.css`, `.scss`, `.sass`, `.less` |
+| Vue        | ✅        | ❌     | `.vue`                            |
+| Svelte     | ✅        | ❌     | `.svelte`                         |
+| Astro      | ✅        | ❌     | `.astro`                          |
+| YAML       | ✅        | ❌     | `.yml`, `.yaml`                   |
+| SQL        | ✅        | ❌     | `.sql`                            |
 
 ## 📋 Commands
 
