@@ -37,7 +37,7 @@ export class DisableRuleFixProvider extends BaseFixProvider {
         document: vscode.TextDocument,
         code: string,
     ): vscode.CodeAction {
-        const action = this.createAction(`Disable "${code}" for this line`)
+        const action = this.createAction(`Disable '${code}' for this line`)
 
         const line = diagnostic.range.start.line
         const edit = new vscode.WorkspaceEdit()
@@ -77,7 +77,7 @@ export class DisableRuleFixProvider extends BaseFixProvider {
         document: vscode.TextDocument,
         code: string,
     ): vscode.CodeAction {
-        const action = this.createAction(`Disable "${code}" for entire file`)
+        const action = this.createAction(`Disable '${code}' for the entire file`)
 
         const edit = new vscode.WorkspaceEdit()
 

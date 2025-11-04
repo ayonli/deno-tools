@@ -27,10 +27,6 @@ export class GeneralFixProvider extends BaseFixProvider {
             }
         }
 
-        // Always add a general "learn more" action
-        const learnMoreAction = this.createLearnMoreAction(diagnostic)
-        actions.push(learnMoreAction)
-
         return actions
     }
 
@@ -43,7 +39,7 @@ export class GeneralFixProvider extends BaseFixProvider {
         const replaceMatch = hint.match(/Use `([^`]+)` instead/)
         if (replaceMatch) {
             const replacement = replaceMatch[1]
-            const action = this.createAction(`Use ${replacement}`)
+            const action = this.createAction(replaceMatch[0])
             const edit = new vscode.WorkspaceEdit()
             edit.replace(document.uri, diagnostic.range, replacement)
 
@@ -53,22 +49,5 @@ export class GeneralFixProvider extends BaseFixProvider {
         }
 
         return null
-    }
-
-    private createLearnMoreAction(diagnostic: vscode.Diagnostic): vscode.CodeAction {
-        const code = diagnostic.code as string
-        const action = this.createAction(
-            `Learn more about this rule`,
-            vscode.CodeActionKind.Empty,
-        )
-
-        // Create a command that opens documentation
-        action.command = {
-            command: "vscode.open",
-            title: "Learn more",
-            arguments: [`https://lint.deno.land/rules/${code}`],
-        }
-
-        return action
     }
 }

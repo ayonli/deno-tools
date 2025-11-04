@@ -28,7 +28,12 @@ export class NoNodeGlobalsFixProvider extends ImportFixProviderBase {
             const replaceMatch = hint.match(/Use `([^`]+)` instead/)
             if (replaceMatch) {
                 const replacement = replaceMatch[1]
-                const replaceFix = this.createReplacementFix(diagnostic, document, replacement)
+                const replaceFix = this.createReplacementFix(
+                    diagnostic,
+                    document,
+                    replacement,
+                    hint,
+                )
                 actions.push(replaceFix)
             }
         }
@@ -40,8 +45,10 @@ export class NoNodeGlobalsFixProvider extends ImportFixProviderBase {
         diagnostic: vscode.Diagnostic,
         document: vscode.TextDocument,
         replacement: string,
+        actionTitle?: string,
     ): vscode.CodeAction {
-        const action = this.createAction(`Use ${replacement} instead`)
+        const title = actionTitle || `Use ${replacement} instead`
+        const action = this.createAction(title)
         const edit = new vscode.WorkspaceEdit()
         edit.replace(document.uri, diagnostic.range, replacement)
 

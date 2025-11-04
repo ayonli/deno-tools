@@ -12,7 +12,7 @@ export abstract class UnderscorePrefixFixProvider extends BaseFixProvider {
     ): vscode.CodeAction {
         const currentText = document.getText(diagnostic.range)
         const newName = `_${currentText}`
-        const title = actionTitle || `Prefix '${currentText}' with underscore: ${newName}`
+        const title = actionTitle || `Prefix with underscore: ${newName}`
 
         const action = this.createAction(title)
         const edit = new vscode.WorkspaceEdit()
