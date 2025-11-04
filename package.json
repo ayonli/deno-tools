@@ -62,10 +62,12 @@
             "properties": {
                 "deno-tools.enable": {
                     "type": [
+                        "null",
                         "boolean",
                         "array"
                     ],
-                    "description": "Enable Deno tools. Can be true (all tools), false (no tools), or an array of specific tools: ['formatter', 'linter']. When unset, automatically enables if deno.json/deno.jsonc is found in the project or user's home directory.",
+                    "description": "Enable Deno tools. Can be `true` (all tools), `false` (no tools), or an array of specific tools: `['formatter', 'linter']`. When unset (`null`, automatically enables if `deno.json`/`deno.jsonc` is found.",
+                    "default": null,
                     "items": {
                         "type": "string",
                         "enum": [

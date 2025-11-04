@@ -241,11 +241,11 @@ export abstract class BaseProvider implements vscode.Disposable {
 
     public checkIfEnabled(config?: vscode.WorkspaceConfiguration): boolean {
         const configuration = config || vscode.workspace.getConfiguration("deno-tools")
-        const enable = configuration.get<boolean | string[]>("enable")
+        const enable = configuration.get<boolean | string[] | null>("enable")
         const toolName = this.getConfigurationSection()
 
         // If explicitly set, use that value
-        if (enable !== undefined) {
+        if (enable !== undefined && enable !== null) {
             if (typeof enable === "boolean") {
                 return enable
             }

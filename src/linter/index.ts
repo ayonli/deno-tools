@@ -162,7 +162,7 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
             const diagnostics = await this.runLint(document)
             this.diagnosticsCollection.set(document.uri, diagnostics)
 
-            if (diagnostics.length > 0 && !this.isDebugEnabled()) {
+            if (diagnostics.length > 0) {
                 this.outputChannel.appendLine(
                     `Found ${diagnostics.length} lint issues in ${document.fileName}`,
                 )
