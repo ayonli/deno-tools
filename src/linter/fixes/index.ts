@@ -18,6 +18,7 @@ export { NoNewSymbolFixProvider } from "./no-new-symbol.ts"
 export { NoNonNullAssertedOptionalChainFixProvider } from "./no-non-null-asserted-optional-chain.ts"
 export { NoVarFixProvider } from "./no-var.ts"
 export { RequireAwaitFixProvider } from "./require-await.ts"
+export { VerbatimModuleSyntaxFixProvider } from "./verbatim-module-syntax.ts"
 export { GeneralFixProvider } from "./general.ts"
 export { DisableRuleFixProvider } from "./disable-rule.ts"
 
@@ -35,6 +36,7 @@ import { NoNewSymbolFixProvider } from "./no-new-symbol.ts"
 import { NoNonNullAssertedOptionalChainFixProvider } from "./no-non-null-asserted-optional-chain.ts"
 import { NoVarFixProvider } from "./no-var.ts"
 import { RequireAwaitFixProvider } from "./require-await.ts"
+import { VerbatimModuleSyntaxFixProvider } from "./verbatim-module-syntax.ts"
 import { GeneralFixProvider } from "./general.ts"
 import { DisableRuleFixProvider } from "./disable-rule.ts"
 
@@ -55,6 +57,7 @@ export function getAllFixProviders(): FixProvider[] {
         new NoNonNullAssertedOptionalChainFixProvider(),
         new NoVarFixProvider(),
         new RequireAwaitFixProvider(),
+        new VerbatimModuleSyntaxFixProvider(),
         new GeneralFixProvider(), // Should be last as it's a fallback
     ]
 }
