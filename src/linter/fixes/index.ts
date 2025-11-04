@@ -29,6 +29,7 @@ export { NoOctalFixProvider } from "./no-octal.ts"
 export { NoVarFixProvider } from "./no-var.ts"
 export { NoUselessRenameFixProvider } from "./no-useless-rename.ts"
 export { NoDebuggerFixProvider } from "./no-debugger.ts"
+export { NoExplicitAnyFixProvider } from "./no-explicit-any.ts"
 export { NoExtraBooleanCastFixProvider } from "./no-extra-boolean-cast.ts"
 export { RequireAwaitFixProvider } from "./require-await.ts"
 export { RequireYieldFixProvider } from "./require-yield.ts"
@@ -67,6 +68,7 @@ import { NoOctalFixProvider } from "./no-octal.ts"
 import { NoVarFixProvider } from "./no-var.ts"
 import { NoUselessRenameFixProvider } from "./no-useless-rename.ts"
 import { NoDebuggerFixProvider } from "./no-debugger.ts"
+import { NoExplicitAnyFixProvider } from "./no-explicit-any.ts"
 import { NoExtraBooleanCastFixProvider } from "./no-extra-boolean-cast.ts"
 import { RequireAwaitFixProvider } from "./require-await.ts"
 import { RequireYieldFixProvider } from "./require-yield.ts"
@@ -108,6 +110,7 @@ export function getAllFixProviders(): FixProvider[] {
         new NoVarFixProvider(),
         new NoUselessRenameFixProvider(),
         new NoDebuggerFixProvider(),
+        new NoExplicitAnyFixProvider(),
         new NoExtraBooleanCastFixProvider(),
         new RequireAwaitFixProvider(),
         new RequireYieldFixProvider(),
