@@ -20,7 +20,7 @@ suite("BanTypes Fix Provider Tests", () => {
         const fixes = provider.createFixes(diagnostic, mockDocument)
 
         assert.strictEqual(fixes.length, 1)
-        assert.strictEqual(fixes[0].title, "Replace 'Boolean' with 'boolean'")
+        assert.strictEqual(fixes[0].title, "Use `boolean` instead")
 
         const edit = fixes[0].edit!
         const changes = edit.get(mockDocument.uri)
@@ -36,7 +36,7 @@ suite("BanTypes Fix Provider Tests", () => {
         const fixes = provider.createFixes(diagnostic, mockDocument)
 
         assert.strictEqual(fixes.length, 1)
-        assert.strictEqual(fixes[0].title, "Replace 'String' with 'string'")
+        assert.strictEqual(fixes[0].title, "Use `string` instead")
 
         const edit = fixes[0].edit!
         const changes = edit.get(mockDocument.uri)
@@ -52,7 +52,7 @@ suite("BanTypes Fix Provider Tests", () => {
         const fixes = provider.createFixes(diagnostic, mockDocument)
 
         assert.strictEqual(fixes.length, 1)
-        assert.strictEqual(fixes[0].title, "Replace 'Number' with 'number'")
+        assert.strictEqual(fixes[0].title, "Use `number` instead")
 
         const edit = fixes[0].edit!
         const changes = edit.get(mockDocument.uri)
@@ -68,7 +68,7 @@ suite("BanTypes Fix Provider Tests", () => {
         const fixes = provider.createFixes(diagnostic, mockDocument)
 
         assert.strictEqual(fixes.length, 1)
-        assert.strictEqual(fixes[0].title, "Replace 'Symbol' with 'symbol'")
+        assert.strictEqual(fixes[0].title, "Use `symbol` instead")
 
         const edit = fixes[0].edit!
         const changes = edit.get(mockDocument.uri)
@@ -90,7 +90,7 @@ suite("BanTypes Fix Provider Tests", () => {
         assert.strictEqual(fixes.length, 1)
         assert.strictEqual(
             fixes[0].title,
-            "Replace 'Function' with '(...args: unknown[]) => unknown'",
+            "Use `(...args: unknown[]) => unknown` instead",
         )
 
         const edit = fixes[0].edit!
@@ -107,7 +107,7 @@ suite("BanTypes Fix Provider Tests", () => {
         const fixes = provider.createFixes(diagnostic, mockDocument)
 
         assert.strictEqual(fixes.length, 1)
-        assert.strictEqual(fixes[0].title, "Replace 'Object' with 'object'")
+        assert.strictEqual(fixes[0].title, "Use `object` instead")
 
         const edit = fixes[0].edit!
         const changes = edit.get(mockDocument.uri)
@@ -127,7 +127,7 @@ suite("BanTypes Fix Provider Tests", () => {
         const fixes = provider.createFixes(diagnostic, mockDocument)
 
         assert.strictEqual(fixes.length, 1)
-        assert.strictEqual(fixes[0].title, "Replace '{}' with 'Record<string, never>'")
+        assert.strictEqual(fixes[0].title, "Use `Record<PropertyKey, never>` instead")
 
         const edit = fixes[0].edit!
         const changes = edit.get(mockDocument.uri)

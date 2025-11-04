@@ -21,20 +21,22 @@ export class VerbatimModuleSyntaxFixProvider extends BaseFixProvider {
             return actions
         }
 
-        const title1 = "Add a `type` keyword"
-        if (hint.includes(title1)) {
-            const addTypeAction = this.createAddTypeKeywordFix(diagnostic, document, title1)
+        if (/[Aa]dd\s+(a\s+)?`type`\s+keyword/.test(hint)) {
+            const addTypeAction = this.createAddTypeKeywordFix(
+                diagnostic,
+                document,
+                "Add `type` keyword",
+            )
             if (addTypeAction) {
                 actions.push(addTypeAction)
             }
         }
 
-        const title2 = "Change `import` to `import type`"
-        if (hint.includes(title2)) {
+        if (/`import`\s+to\s+`import\s+type`/.test(hint)) {
             const changeImportAction = this.createChangeImportToImportTypeFix(
                 diagnostic,
                 document,
-                title2,
+                "Change `import` to `import type`",
             )
             if (changeImportAction) {
                 actions.push(changeImportAction)

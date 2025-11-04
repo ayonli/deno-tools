@@ -12,13 +12,9 @@ export class PreferConstFixProvider extends TextReplacementFixProvider {
         document: vscode.TextDocument,
     ): vscode.CodeAction[] {
         const actions: vscode.CodeAction[] = []
-        const hint = this.extractHint(diagnostic)
-
-        if (hint && hint.includes("Use `const` instead")) {
-            const constFix = this.createConstReplacementFix(diagnostic, document)
-            if (constFix) {
-                actions.push(constFix)
-            }
+        const constFix = this.createConstReplacementFix(diagnostic, document)
+        if (constFix) {
+            actions.push(constFix)
         }
 
         return actions

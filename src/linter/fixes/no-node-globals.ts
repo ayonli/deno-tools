@@ -1,5 +1,6 @@
 import * as vscode from "vscode"
 import { ImportFixProviderBase } from "./bases/import-fix-base.ts"
+import { UseInsteadHelper } from "./bases/use-instead-base.ts"
 
 /**
  * Fix provider specifically for no-node-globals rule
@@ -17,7 +18,7 @@ export class NoNodeGlobalsFixProvider extends ImportFixProviderBase {
 
         if (hint) {
             // Check for import suggestions
-            const importMatch = hint.match(/Add `([^`]+)`/)
+            const importMatch = hint.match(/add\s+`([^`]+)`/i)
             if (importMatch) {
                 const importStatement = importMatch[1]
                 const importFix = this.createImportFix(diagnostic, document, importStatement, hint)
@@ -25,35 +26,14 @@ export class NoNodeGlobalsFixProvider extends ImportFixProviderBase {
             }
 
             // Check for replacement suggestions (like "Use globalThis instead")
-            const replaceMatch = hint.match(/Use `([^`]+)` instead/)
-            if (replaceMatch) {
-                const replacement = replaceMatch[1]
-                const replaceFix = this.createReplacementFix(
-                    diagnostic,
-                    document,
-                    replacement,
-                    hint,
-                )
-                actions.push(replaceFix)
+            const useInsteadFix = UseInsteadHelper.createUseInsteadFix(this, diagnostic, document)
+            if (useInsteadFix) {
+                actions.push(useInsteadFix)
             }
         }
 
         return actions
     }
 
-    private createReplacementFix(
-        diagnostic: vscode.Diagnostic,
-        document: vscode.TextDocument,
-        replacement: string,
-        actionTitle?: string,
-    ): vscode.CodeAction {
-        const title = actionTitle || `Use ${replacement} instead`
-        const action = this.createAction(title)
-        const edit = new vscode.WorkspaceEdit()
-        edit.replace(document.uri, diagnostic.range, replacement)
 
-        action.edit = edit
-        action.diagnostics = [diagnostic]
-        return action
-    }
 }

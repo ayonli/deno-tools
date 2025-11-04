@@ -38,12 +38,7 @@ export class NoUnusedVarsFixProvider extends UnderscorePrefixFixProvider {
 
         // Check if this is a standalone variable declaration that can be safely removed
         if (this.canRemoveVariable(lineText, variableName)) {
-            const hint = this.extractHint(diagnostic)
-            const actionTitle = hint?.includes("remove")
-                ? hint
-                : `Remove unused variable '${variableName}'`
-
-            const action = this.createAction(actionTitle)
+            const action = this.createAction(`Remove unused variable '${variableName}'`)
             const edit = new vscode.WorkspaceEdit()
 
             // Remove the entire line if it's a standalone declaration

@@ -4,6 +4,7 @@ export type { FixProvider } from "./bases/base.ts"
 export { UnderscorePrefixFixProvider } from "./bases/underscore-prefix-base.ts"
 export { ImportFixProviderBase } from "./bases/import-fix-base.ts"
 export { TextReplacementFixProvider } from "./bases/text-replacement-base.ts"
+export { UseInsteadFixProviderBase, UseInsteadHelper } from "./bases/use-instead-base.ts"
 
 // Export rule-specific fix providers
 export { NoUnusedVarsFixProvider } from "./no-unused-vars.ts"

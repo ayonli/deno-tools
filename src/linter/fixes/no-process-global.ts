@@ -15,7 +15,7 @@ export class NoProcessGlobalFixProvider extends ImportFixProviderBase {
         const hint = this.extractHint(diagnostic)
 
         if (hint) {
-            const match = hint.match(/Add `([^`]+)`/)
+            const match = hint.match(/[Aa]dd\s+`([^`]+)`/)
             if (match) {
                 const importStatement = match[1]
                 const importFix = this.createImportFix(diagnostic, document, importStatement, hint)

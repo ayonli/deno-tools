@@ -1,5 +1,6 @@
 import * as vscode from "vscode"
 import { BaseFixProvider } from "./bases/base.ts"
+import { UseInsteadHelper } from "./bases/use-instead-base.ts"
 
 /**
  * General fix provider for rules that don't have specific implementations
@@ -35,17 +36,10 @@ export class GeneralFixProvider extends BaseFixProvider {
         document: vscode.TextDocument,
         hint: string,
     ): vscode.CodeAction | null {
-        // Try to extract simple replacement suggestions from hints
-        const replaceMatch = hint.match(/[Uu]se `([^`]+)` instead/)
-        if (replaceMatch) {
-            const replacement = replaceMatch[1]
-            const action = this.createAction(`Use \`${replacement}\` instead`)
-            const edit = new vscode.WorkspaceEdit()
-            edit.replace(document.uri, diagnostic.range, replacement)
-
-            action.edit = edit
-            action.diagnostics = [diagnostic]
-            return action
+        // Use the standardized helper for "Use X instead" patterns
+        const replacement = UseInsteadHelper.extractReplacementFromHint(hint)
+        if (replacement) {
+            return UseInsteadHelper.createReplacementAction(this, diagnostic, document, replacement)
         }
 
         return null
