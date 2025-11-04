@@ -125,6 +125,7 @@
         "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
         "build": "npm run sanitize && deno run -A esbuild.ts --production",
         "pack": "vsce package",
+        "publish": "vsce publish",
         "compile-tests": "tsc -p . --outDir out",
         "watch-tests": "tsc -p . -w --outDir out",
         "pretest": "npm run compile-tests && npm run compile",
