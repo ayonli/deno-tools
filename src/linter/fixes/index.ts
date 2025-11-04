@@ -19,6 +19,7 @@ export { EqeqeqFixProvider } from "./eqeqeq.ts"
 export { NoCaseDeclarationsFixProvider } from "./no-case-declarations.ts"
 export { NoImportAssertionsFixProvider } from "./no-import-assertions.ts"
 export { NoFallthroughFixProvider } from "./no-fallthrough.ts"
+export { NoInvalidTripleSlashReferenceFixProvider } from "./no-invalid-triple-slash-reference.ts"
 export { NoMisusedNewFixProvider } from "./no-misused-new.ts"
 export { NoNewSymbolFixProvider } from "./no-new-symbol.ts"
 export { NoNonNullAssertedOptionalChainFixProvider } from "./no-non-null-asserted-optional-chain.ts"
@@ -46,6 +47,7 @@ import { EqeqeqFixProvider } from "./eqeqeq.ts"
 import { NoCaseDeclarationsFixProvider } from "./no-case-declarations.ts"
 import { NoImportAssertionsFixProvider } from "./no-import-assertions.ts"
 import { NoFallthroughFixProvider } from "./no-fallthrough.ts"
+import { NoInvalidTripleSlashReferenceFixProvider } from "./no-invalid-triple-slash-reference.ts"
 import { NoMisusedNewFixProvider } from "./no-misused-new.ts"
 import { NoNewSymbolFixProvider } from "./no-new-symbol.ts"
 import { NoNonNullAssertedOptionalChainFixProvider } from "./no-non-null-asserted-optional-chain.ts"
@@ -76,6 +78,7 @@ export function getAllFixProviders(): FixProvider[] {
         new NoCaseDeclarationsFixProvider(),
         new NoImportAssertionsFixProvider(),
         new NoFallthroughFixProvider(),
+        new NoInvalidTripleSlashReferenceFixProvider(),
         new NoMisusedNewFixProvider(),
         new NoNewSymbolFixProvider(),
         new NoNonNullAssertedOptionalChainFixProvider(),

@@ -41,11 +41,11 @@ export class NoMisusedNewFixProvider extends BaseFixProvider {
         if (context === "class" && lineText.includes("new(")) {
             // In class: new() -> constructor()
             updatedLine = lineText.replace(/\bnew\s*\(/g, "constructor(")
-            actionTitle = "Change to constructor()"
+            actionTitle = "Change to `constructor()`"
         } else if (context === "interface" && lineText.includes("constructor(")) {
             // In interface: constructor() -> new()
             updatedLine = lineText.replace(/\bconstructor\s*\(/g, "new(")
-            actionTitle = "Change to new()"
+            actionTitle = "Change to `new()`"
         } else {
             return null
         }
