@@ -28,6 +28,7 @@ export { NoNonNullAssertedOptionalChainFixProvider } from "./no-non-null-asserte
 export { NoOctalFixProvider } from "./no-octal.ts"
 export { NoVarFixProvider } from "./no-var.ts"
 export { NoUselessRenameFixProvider } from "./no-useless-rename.ts"
+export { NoDebuggerFixProvider } from "./no-debugger.ts"
 export { RequireAwaitFixProvider } from "./require-await.ts"
 export { RequireYieldFixProvider } from "./require-yield.ts"
 export { VerbatimModuleSyntaxFixProvider } from "./verbatim-module-syntax.ts"
@@ -64,6 +65,7 @@ import { NoNonNullAssertedOptionalChainFixProvider } from "./no-non-null-asserte
 import { NoOctalFixProvider } from "./no-octal.ts"
 import { NoVarFixProvider } from "./no-var.ts"
 import { NoUselessRenameFixProvider } from "./no-useless-rename.ts"
+import { NoDebuggerFixProvider } from "./no-debugger.ts"
 import { RequireAwaitFixProvider } from "./require-await.ts"
 import { RequireYieldFixProvider } from "./require-yield.ts"
 import { VerbatimModuleSyntaxFixProvider } from "./verbatim-module-syntax.ts"
@@ -103,6 +105,7 @@ export function getAllFixProviders(): FixProvider[] {
         new NoOctalFixProvider(),
         new NoVarFixProvider(),
         new NoUselessRenameFixProvider(),
+        new NoDebuggerFixProvider(),
         new RequireAwaitFixProvider(),
         new RequireYieldFixProvider(),
         new VerbatimModuleSyntaxFixProvider(),
