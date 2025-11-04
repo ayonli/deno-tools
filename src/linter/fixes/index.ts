@@ -37,6 +37,7 @@ export { BanUntaggedIgnoreFixProvider } from "./ban-untagged-ignore.ts"
 export { BanUnusedIgnoreFixProvider } from "./ban-unused-ignore.ts"
 export { JsxBooleanValueFixProvider } from "./jsx-boolean-value.ts"
 export { JsxCurlyBracesFixProvider } from "./jsx-curly-braces.ts"
+export { JsxNoUselessFragmentFixProvider } from "./jsx-no-useless-fragment.ts"
 export { GeneralFixProvider } from "./general.ts"
 export { DisableRuleFixProvider } from "./disable-rule.ts"
 
@@ -72,6 +73,7 @@ import { BanUntaggedIgnoreFixProvider } from "./ban-untagged-ignore.ts"
 import { BanUnusedIgnoreFixProvider } from "./ban-unused-ignore.ts"
 import { JsxBooleanValueFixProvider } from "./jsx-boolean-value.ts"
 import { JsxCurlyBracesFixProvider } from "./jsx-curly-braces.ts"
+import { JsxNoUselessFragmentFixProvider } from "./jsx-no-useless-fragment.ts"
 import { GeneralFixProvider } from "./general.ts"
 import { DisableRuleFixProvider } from "./disable-rule.ts"
 
@@ -110,6 +112,7 @@ export function getAllFixProviders(): FixProvider[] {
         new BanUnusedIgnoreFixProvider(),
         new JsxBooleanValueFixProvider(),
         new JsxCurlyBracesFixProvider(),
+        new JsxNoUselessFragmentFixProvider(),
         new GeneralFixProvider(), // Should be last as it's a fallback
     ]
 }
