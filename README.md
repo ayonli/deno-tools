@@ -24,6 +24,7 @@ in your project hierarchy and falls back to the user's home directory.
 
 - **Real-time Diagnostics**: Live linting with detailed diagnostics and helpful hints.
 - **Auto-fixes**: Quick fix actions for various rules.
+- **Integrity**: Respect `include` and `exclude` settings in `deno.json`.
 
 ### 🛠 **Commands**
 
@@ -64,60 +65,16 @@ in your project hierarchy and falls back to the user's home directory.
 
 This extension provides several configuration options accessible via VS Code settings:
 
-| Setting                          | Default     | Description                                                                                                                                                                                           |
-| -------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `deno-tools.enable`              | Auto-detect | Enable Deno tools. Can be `true` (all), `false` (none), or `["formatter", "linter"]`. When unset, automatically enables if `deno.json`/`deno.jsonc` is found in the project or user's home directory. |
-| `deno-tools.linter.lintOnChange` | `true`      | Enable linting while typing (disable to only lint on save/manual triggers)                                                                                                                            |
-| `deno-tools.linter.debounceMs`   | `1500`      | Debounce delay in milliseconds for linting after document changes                                                                                                                                     |
-
-### Configuration Examples
-
-**Auto-detection (default behavior):**
-
-```json
-{
-    // No deno-tools.enable setting
-    // Extension automatically enables if deno.json/deno.jsonc is found in:
-    // 1. Project directory (searches up the tree)
-    // 2. User's home directory (as fallback)
-}
-```
-
-**Explicitly enable all tools:**
-
-```json
-{
-    "deno-tools.enable": true
-}
-```
-
-**Disable all tools:**
-
-```json
-{
-    "deno-tools.enable": false
-}
-```
-
-**Enable only the formatter:**
-
-```json
-{
-    "deno-tools.enable": ["formatter"]
-}
-```
-
-**Enable only the linter:**
-
-```json
-{
-    "deno-tools.enable": ["linter"]
-}
-```
+| Setting | Default | Description |
+| ------- | ------- | ----------- |
+| `deno-tools.enable`              | Auto-detect | Enable Deno tools. Can be `true` (all tools), `false` (no tools), or an array of specific tools: `['formatter', 'linter']`. |
+| `deno-tools.linter.lintOnChange` | `true`      | Enable linting while typing (disable to only lint on save/manual triggers) |
+| `deno-tools.linter.debounceMs`   | `1500`      | Debounce delay in milliseconds for linting after document changes (higher values = less interruption while typing) |
+| `deno-tools.linter.severity`     | `error`     | Default `error`, set to `warning` or `info` for VS Code to provide informative diagnostics but the rules are not enforced in CI pipelines. |
 
 ## 🎯 Supported Languages
 
-| Language   | Formatting | Linting | File Extensions                   |
+| Language   | Formatter | Linter | File Extensions                   |
 | ---------- | ---------- | ------- | --------------------------------- |
 | TypeScript | ✅         | ✅      | `.ts`, `.tsx`, `.mts`, `.cts`     |
 | JavaScript | ✅         | ✅      | `.js`, `.jsx`, `.mjs`, `.cjs`     |
@@ -153,7 +110,8 @@ Access these commands via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):
 - Hover over underlined issues to see detailed information and quick fixes.
 - Use "Fix Current File" to apply all available auto-fixes at once.
 - Linting respects your `deno.json` configuration for included/excluded files and rules.
-- Only works with TypeScript and JavaScript files.
+- Disable `noUnusedLocals` and `noUnusedParameters` compiler options in `tsconfig.json` in favor of
+  the `no-unused-vars` linting rule.
 
 ### Performance
 

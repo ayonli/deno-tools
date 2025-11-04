@@ -66,7 +66,7 @@
                         "boolean",
                         "array"
                     ],
-                    "description": "Enable Deno tools. Can be `true` (all tools), `false` (no tools), or an array of specific tools: `['formatter', 'linter']`. When unset (`null`, automatically enables if `deno.json`/`deno.jsonc` is found.",
+                    "description": "Enable Deno tools. Can be `true` (all tools), `false` (no tools), or an array of specific tools: `['formatter', 'linter']`. When not set (`null`), automatically enables if `deno.json`/`deno.jsonc` is found.",
                     "default": null,
                     "items": {
                         "type": "string",
@@ -92,6 +92,21 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Enable debug mode for the linter - prints detailed diagnostic information to the output channel"
+                },
+                "deno-tools.linter.severity": {
+                    "type": "string",
+                    "default": "error",
+                    "enum": [
+                        "error",
+                        "warning",
+                        "info"
+                    ],
+                    "enumDescriptions": [
+                        "Show lint issues as errors and provide actions to disable the affected rules",
+                        "Show lint issues as warnings",
+                        "Show lint issues as information"
+                    ],
+                    "description": "Default `error`, set to `warning` or `info` for VS Code to provide informative diagnostics but the rules are not enforced in CI pipelines."
                 }
             }
         },
@@ -105,18 +120,18 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run package",
-        "compile": "npm run check-types && npm run lint && deno run -A esbuild.ts",
+        "compile": "npm run sanitize && deno run -A esbuild.ts",
         "watch": "npm-run-all -p watch:*",
         "watch:esbuild": "deno run -A esbuild.ts --watch",
         "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
-        "package": "npm run check-types && npm run lint && deno run -A esbuild.ts --production",
+        "package": "npm run sanitize && deno run -A esbuild.ts --production",
         "compile-tests": "tsc -p . --outDir out",
         "watch-tests": "tsc -p . -w --outDir out",
         "pretest": "npm run compile-tests && npm run compile",
         "check-types": "tsc --noEmit",
-        "lint": "deno lint src/",
-        "fmt": "deno fmt src/",
-        "fmt:check": "deno fmt --check src/",
+        "lint": "deno lint --fix",
+        "fmt": "deno fmt",
+        "sanitize": "npm run lint && npm run fmt && npm run check-types",
         "test": "vscode-test",
         "test:unit": "echo 'Unit tests would run here - requires VS Code test environment'",
         "test:skip": "echo 'Tests skipped - use npm run test for full VS Code integration tests'"

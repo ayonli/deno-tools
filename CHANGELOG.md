@@ -16,16 +16,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Multi-language support: TypeScript, JavaScript, JSX, TSX, JSON, JSONC, Markdown, HTML, CSS, SCSS, Sass, Less, Vue, Svelte, Astro, YAML, and SQL.
 
 - **Linting**
-  - Real-time diagnostics with hint
-  - Quick fix actions for various rules
+  - Real-time diagnostics with hint.
+  - Quick fix actions for various rules.
+  - Respect `include` and `exclude` settings in `deno.json`.
 
 - **Commands**
   - `Deno Tools: Fix Current File` - Apply all available auto-fixes.
 
 - **Configuration Options**
-  - `deno-tools.enable` - Control how the tools are enabled (boolean or array); auto-detects Deno projects when unset.
-  - `deno-tools.linter.lintOnChange` - Enable/disable live linting.
-  - `deno-tools.linter.debounceMs` - Configurable typing debounce delay when `lintOnChange` is enabled.
+  - `deno-tools.enable` - Enable Deno tools. Can be `true` (all tools), `false` (no tools), or an
+    array of specific tools: `['formatter', 'linter']`. When not set (`null`), automatically enables
+    if `deno.json`/`deno.jsonc` is found.
+  - `deno-tools.linter.lintOnChange` - Enable linting while typing (disable to only lint on save/manual triggers)
+  - `deno-tools.linter.debounceMs` - Debounce delay in milliseconds for linting after document changes (higher values = less interruption while typing)
+  - `deno-tools.linter.severity` Default `error`, set to `warning` or `info` for VS Code to provide informative diagnostics but the rules are not enforced in CI pipelines.
 
 #### Features
 

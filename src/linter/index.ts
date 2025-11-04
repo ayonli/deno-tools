@@ -290,12 +290,19 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
         return diagnostic
     }
 
-    private getSeverity(code: string): vscode.DiagnosticSeverity {
-        // Most Deno lint rules are errors, but some could be warnings
-        const warningCodes = ["prefer-const", "no-unused-vars"]
-        return warningCodes.includes(code)
-            ? vscode.DiagnosticSeverity.Warning
-            : vscode.DiagnosticSeverity.Error
+    private getSeverity(_code: string): vscode.DiagnosticSeverity {
+        const config = vscode.workspace.getConfiguration("deno-tools.linter")
+        const severityConfig = config.get<string>("severity", "error")
+
+        switch (severityConfig) {
+            case "warning":
+                return vscode.DiagnosticSeverity.Warning
+            case "info":
+                return vscode.DiagnosticSeverity.Information
+            case "error":
+            default:
+                return vscode.DiagnosticSeverity.Error
+        }
     }
 
     // Code Actions Provider implementation
@@ -327,9 +334,14 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
                 }
             }
 
-            // Collect disable rule options separately
-            const disableFixes = this.disableRuleProvider.createFixes(diagnostic, document)
-            disableActions.push(...disableFixes)
+            // Only provide disable rule fixes when severity is set to "error"
+            const config = vscode.workspace.getConfiguration("deno-tools.linter")
+            const severityConfig = config.get<string>("severity", "error")
+
+            if (severityConfig === "error") {
+                const disableFixes = this.disableRuleProvider.createFixes(diagnostic, document)
+                disableActions.push(...disableFixes)
+            }
         }
 
         // Return regular actions first, then disable actions at the bottom
