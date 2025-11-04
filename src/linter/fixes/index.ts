@@ -30,6 +30,7 @@ export { NoUselessRenameFixProvider } from "./no-useless-rename.ts"
 export { RequireAwaitFixProvider } from "./require-await.ts"
 export { RequireYieldFixProvider } from "./require-yield.ts"
 export { VerbatimModuleSyntaxFixProvider } from "./verbatim-module-syntax.ts"
+export { BanTypesFixProvider } from "./ban-types.ts"
 export { GeneralFixProvider } from "./general.ts"
 export { DisableRuleFixProvider } from "./disable-rule.ts"
 
@@ -59,6 +60,7 @@ import { NoUselessRenameFixProvider } from "./no-useless-rename.ts"
 import { RequireAwaitFixProvider } from "./require-await.ts"
 import { RequireYieldFixProvider } from "./require-yield.ts"
 import { VerbatimModuleSyntaxFixProvider } from "./verbatim-module-syntax.ts"
+import { BanTypesFixProvider } from "./ban-types.ts"
 import { GeneralFixProvider } from "./general.ts"
 import { DisableRuleFixProvider } from "./disable-rule.ts"
 
@@ -91,6 +93,7 @@ export function getAllFixProviders(): FixProvider[] {
         new RequireAwaitFixProvider(),
         new RequireYieldFixProvider(),
         new VerbatimModuleSyntaxFixProvider(),
+        new BanTypesFixProvider(),
         new GeneralFixProvider(), // Should be last as it's a fallback
     ]
 }

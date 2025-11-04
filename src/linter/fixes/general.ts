@@ -36,10 +36,10 @@ export class GeneralFixProvider extends BaseFixProvider {
         hint: string,
     ): vscode.CodeAction | null {
         // Try to extract simple replacement suggestions from hints
-        const replaceMatch = hint.match(/Use `([^`]+)` instead/)
+        const replaceMatch = hint.match(/[Uu]se `([^`]+)` instead/)
         if (replaceMatch) {
             const replacement = replaceMatch[1]
-            const action = this.createAction(replaceMatch[0])
+            const action = this.createAction(`Use \`${replacement}\` instead`)
             const edit = new vscode.WorkspaceEdit()
             edit.replace(document.uri, diagnostic.range, replacement)
 
