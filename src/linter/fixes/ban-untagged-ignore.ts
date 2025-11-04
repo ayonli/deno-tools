@@ -47,23 +47,12 @@ export class BanUntaggedIgnoreFixProvider extends BaseFixProvider {
             const text = line.text.trim()
 
             // Check if this line contains a bare deno-lint-ignore comment
-            if (this.isBareIgnoreComment(text)) {
+            if (/^\/\/\s*deno-lint-ignore\s*$/.test(text)) {
                 return i
             }
         }
 
         return null
-    }
-
-    /**
-     * Check if a line contains a bare deno-lint-ignore comment (without specific rules)
-     * Note: deno-lint-ignore-file without rules is legal and used to disable linting for entire file
-     */
-    private isBareIgnoreComment(text: string): boolean {
-        // Only match bare deno-lint-ignore comments (not file-level)
-        const bareIgnorePattern = /^\/\/\s*deno-lint-ignore\s*$/
-
-        return bareIgnorePattern.test(text)
     }
 
     /**

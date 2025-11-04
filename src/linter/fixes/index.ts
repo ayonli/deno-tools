@@ -34,6 +34,7 @@ export { VerbatimModuleSyntaxFixProvider } from "./verbatim-module-syntax.ts"
 export { BanTypesFixProvider } from "./ban-types.ts"
 export { BanUnknownRuleCodeFixProvider } from "./ban-unknown-rule-code.ts"
 export { BanUntaggedIgnoreFixProvider } from "./ban-untagged-ignore.ts"
+export { BanUnusedIgnoreFixProvider } from "./ban-unused-ignore.ts"
 export { GeneralFixProvider } from "./general.ts"
 export { DisableRuleFixProvider } from "./disable-rule.ts"
 
@@ -66,6 +67,7 @@ import { VerbatimModuleSyntaxFixProvider } from "./verbatim-module-syntax.ts"
 import { BanTypesFixProvider } from "./ban-types.ts"
 import { BanUnknownRuleCodeFixProvider } from "./ban-unknown-rule-code.ts"
 import { BanUntaggedIgnoreFixProvider } from "./ban-untagged-ignore.ts"
+import { BanUnusedIgnoreFixProvider } from "./ban-unused-ignore.ts"
 import { GeneralFixProvider } from "./general.ts"
 import { DisableRuleFixProvider } from "./disable-rule.ts"
 
@@ -101,6 +103,7 @@ export function getAllFixProviders(): FixProvider[] {
         new BanTypesFixProvider(),
         new BanUnknownRuleCodeFixProvider(),
         new BanUntaggedIgnoreFixProvider(),
+        new BanUnusedIgnoreFixProvider(),
         new GeneralFixProvider(), // Should be last as it's a fallback
     ]
 }

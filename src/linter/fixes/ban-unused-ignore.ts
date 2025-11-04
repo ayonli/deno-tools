@@ -2,11 +2,11 @@ import * as vscode from "vscode"
 import { BaseFixProvider } from "./bases/base.ts"
 
 /**
- * Fix provider for ban-unknown-rule-code rule
- * Removes unknown rule codes from deno-lint-ignore and deno-lint-ignore-file comments
+ * Fix provider for ban-unused-ignore rule
+ * Removes unused rule codes from deno-lint-ignore and deno-lint-ignore-file comments
  */
-export class BanUnknownRuleCodeFixProvider extends BaseFixProvider {
-    readonly ruleCodes = ["ban-unknown-rule-code"]
+export class BanUnusedIgnoreFixProvider extends BaseFixProvider {
+    readonly ruleCodes = ["ban-unused-ignore"]
 
     createFixes(
         diagnostic: vscode.Diagnostic,
@@ -14,28 +14,28 @@ export class BanUnknownRuleCodeFixProvider extends BaseFixProvider {
     ): vscode.CodeAction[] {
         const actions: vscode.CodeAction[] = []
 
-        // Extract the unknown rule name from the diagnostic message
-        const unknownRule = this.extractUnknownRuleFromMessage(diagnostic.message)
-        if (!unknownRule) {
+        // Extract the unused rule name from the diagnostic message or hint
+        const unusedRule = this.extractUnusedRuleFromDiagnostic(diagnostic)
+        if (!unusedRule) {
             return actions
         }
 
-        // Find the ignore comment that contains this unknown rule
+        // Find the ignore comment that contains this unused rule
         const ignoreCommentLine = this.findIgnoreCommentWithRule(
             document,
             diagnostic.range,
-            unknownRule,
+            unusedRule,
         )
         if (ignoreCommentLine === null) {
             return actions
         }
 
-        // Create action to remove the unknown rule
-        const removeAction = this.createRemoveUnknownRuleAction(
+        // Create action to remove the unused rule
+        const removeAction = this.createRemoveUnusedRuleAction(
             diagnostic,
             document,
             ignoreCommentLine,
-            unknownRule,
+            unusedRule,
         )
         actions.push(removeAction)
 
@@ -43,20 +43,38 @@ export class BanUnknownRuleCodeFixProvider extends BaseFixProvider {
     }
 
     /**
-     * Extract the unknown rule name from the diagnostic message
+     * Extract the unused rule name from the diagnostic message or hint
      */
-    private extractUnknownRuleFromMessage(message: string): string | null {
-        const match = message.match(/['"`]([^'"`]+)['"`]/)
+    private extractUnusedRuleFromDiagnostic(diagnostic: vscode.Diagnostic): string | null {
+        // First try to extract from the main message
+        let unusedRule = this.extractUnusedRuleFromMessage(diagnostic.message)
+
+        // If not found in main message, try the hint from related information
+        if (!unusedRule) {
+            const hint = this.extractHint(diagnostic)
+            if (hint) {
+                unusedRule = this.extractUnusedRuleFromMessage(hint)
+            }
+        }
+
+        return unusedRule
+    }
+
+    /**
+     * Extract the unused rule name from a message string
+     */
+    private extractUnusedRuleFromMessage(message: string): string | null {
+        const match = message.match(/["'`]([^"'`]+)["'`]/)
         return match?.[1] ?? null
     }
 
     /**
-     * Find the line containing the ignore comment with the unknown rule
+     * Find the line containing the ignore comment with the unused rule
      */
     private findIgnoreCommentWithRule(
         document: vscode.TextDocument,
         diagnosticRange: vscode.Range,
-        unknownRule: string,
+        unusedRule: string,
     ): number | null {
         const startLine = Math.max(0, diagnosticRange.start.line - 10)
         const endLine = Math.min(document.lineCount - 1, diagnosticRange.end.line + 3)
@@ -65,8 +83,8 @@ export class BanUnknownRuleCodeFixProvider extends BaseFixProvider {
             const line = document.lineAt(i)
             const text = line.text
 
-            // Check if this line contains a deno-lint-ignore comment with the unknown rule
-            if (this.isIgnoreCommentWithRule(text, unknownRule)) {
+            // Check if this line contains a deno-lint-ignore comment with the unused rule
+            if (this.isIgnoreCommentWithRule(text, unusedRule)) {
                 return i
             }
         }
@@ -98,15 +116,15 @@ export class BanUnknownRuleCodeFixProvider extends BaseFixProvider {
     }
 
     /**
-     * Create action to remove the unknown rule from the ignore comment
+     * Create action to remove the unused rule from the ignore comment
      */
-    private createRemoveUnknownRuleAction(
+    private createRemoveUnusedRuleAction(
         diagnostic: vscode.Diagnostic,
         document: vscode.TextDocument,
         lineNumber: number,
-        unknownRule: string,
+        unusedRule: string,
     ): vscode.CodeAction {
-        const action = this.createAction(`Remove unknown rule '${unknownRule}'`)
+        const action = this.createAction(`Remove unused ignore rule '${unusedRule}'`)
 
         const line = document.lineAt(lineNumber)
         const originalText = line.text
@@ -122,7 +140,7 @@ export class BanUnknownRuleCodeFixProvider extends BaseFixProvider {
         const commentPrefix = match[1]
         const rulesText = match[2].trim()
         const rules = rulesText.split(/\s+/).filter((rule) =>
-            rule !== unknownRule && rule.trim() !== ""
+            rule !== unusedRule && rule.trim() !== ""
         )
 
         const edit = new vscode.WorkspaceEdit()
