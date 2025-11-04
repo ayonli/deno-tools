@@ -33,46 +33,8 @@ export function activate(context: vscode.ExtensionContext) {
             )
 
             // First lint the document to get fresh diagnostics
-            await lintingProvider.lintDocument(activeEditor.document)
-
-            // Get all available code actions (fixes) for the current file
-            const codeActions = await lintingProvider.provideCodeActions(
-                activeEditor.document,
-                new vscode.Range(0, 0, activeEditor.document.lineCount - 1, 0),
-                {
-                    diagnostics: lintingProvider.getDiagnosticsForDocument(activeEditor.document),
-                    only: vscode.CodeActionKind.QuickFix,
-                    triggerKind: vscode.CodeActionTriggerKind.Invoke,
-                },
-                new vscode.CancellationTokenSource().token,
-            )
-
-            if (!codeActions || codeActions.length === 0) {
-                vscode.window.showInformationMessage("No auto-fixes available for this file")
-                return
-            }
-
-            let fixesApplied = 0
-            for (const codeAction of codeActions) {
-                if (codeAction instanceof vscode.CodeAction && codeAction.edit) {
-                    try {
-                        await vscode.workspace.applyEdit(codeAction.edit)
-                        fixesApplied++
-                    } catch (error) {
-                        console.error(`Failed to apply fix "${codeAction.title}":`, error)
-                    }
-                }
-            }
-
-            if (fixesApplied > 0) {
-                vscode.window.showInformationMessage(
-                    `✅ Applied ${fixesApplied} auto-fix(es) to current file`,
-                )
-                // Re-lint after applying fixes to update diagnostics
-                setTimeout(() => lintingProvider.lintDocument(activeEditor.document), 100)
-            } else {
-                vscode.window.showInformationMessage("No fixes could be applied automatically")
-            }
+            await lintingProvider.lintDocument(activeEditor.document, true)
+            setTimeout(() => lintingProvider.lintDocument(activeEditor.document), 100)
         },
     )
 

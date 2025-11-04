@@ -14,6 +14,7 @@ export interface ToolConfiguration {
 }
 
 export interface CommandOptions {
+    args?: string[]
     cwd?: string
     cancellationToken?: vscode.CancellationToken
     throwOnError?: boolean
@@ -415,8 +416,9 @@ export abstract class BaseProvider implements vscode.Disposable {
         options: CommandOptions = {},
     ): Promise<{ stdout: string; stderr: string }> {
         const input = document.getText()
-        const args = this.getCommandArgs(document)
+        const args = options.args ?? this.getCommandArgs(document)
         const { cwd, cancellationToken, throwOnError = false } = options
+        console.log("deno " + args.join(" "))
         const childProcess = spawn("deno", args, { cwd })
 
         return new Promise((resolve, reject) => {

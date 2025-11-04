@@ -153,13 +153,13 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
         }
     }
 
-    public async lintDocument(document: vscode.TextDocument): Promise<void> {
+    public async lintDocument(document: vscode.TextDocument, fix = false): Promise<void> {
         if (!this.enabled || !this.isSupportedDocument(document)) {
             return
         }
 
         try {
-            const diagnostics = await this.runLint(document)
+            const diagnostics = await this.runLint(document, fix)
             this.diagnosticsCollection.set(document.uri, diagnostics)
 
             if (diagnostics.length > 0) {
@@ -174,11 +174,21 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
         }
     }
 
-    private async runLint(document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
+    private async runLint(
+        document: vscode.TextDocument,
+        fix = false,
+    ): Promise<vscode.Diagnostic[]> {
         // Get the workspace folder for proper working directory
         const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri)
         const cwd = workspaceFolder ? workspaceFolder.uri.fsPath : process.cwd()
-        const { stdout, stderr } = await this.executeCommand(document, { cwd })
+        const args = this.getCommandArgs(document)
+        if (fix) {
+            args.pop()
+            args.push("--fix")
+            args.push(document.fileName)
+        }
+
+        const { stdout, stderr } = await this.executeCommand(document, { args, cwd })
 
         if (stderr && !stdout) {
             throw new Error(stderr)
