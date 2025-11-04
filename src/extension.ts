@@ -32,9 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
                 `🔧 EXTENSION: Fix command for ${activeEditor.document.fileName} (${activeEditor.document.languageId})`,
             )
 
-            // First lint the document to get fresh diagnostics
             await lintingProvider.lintDocument(activeEditor.document, true)
-            setTimeout(() => lintingProvider.lintDocument(activeEditor.document), 100)
         },
     )
 
