@@ -10,6 +10,7 @@ export { NoUnusedVarsFixProvider } from "./no-unused-vars.ts"
 export { PreferConstFixProvider } from "./prefer-const.ts"
 export { NoProcessGlobalFixProvider } from "./no-process-global.ts"
 export { NoNodeGlobalsFixProvider } from "./no-node-globals.ts"
+export { NoSetterReturnFixProvider } from "./no-setter-return.ts"
 export { NoSloppyImportsFixProvider } from "./no-sloppy-imports.ts"
 export { NoSparseArraysFixProvider } from "./no-sparse-arrays.ts"
 export { NoThrowLiteralFixProvider } from "./no-throw-literal.ts"
@@ -33,6 +34,7 @@ import { NoUnusedVarsFixProvider } from "./no-unused-vars.ts"
 import { PreferConstFixProvider } from "./prefer-const.ts"
 import { NoProcessGlobalFixProvider } from "./no-process-global.ts"
 import { NoNodeGlobalsFixProvider } from "./no-node-globals.ts"
+import { NoSetterReturnFixProvider } from "./no-setter-return.ts"
 import { NoSloppyImportsFixProvider } from "./no-sloppy-imports.ts"
 import { NoSparseArraysFixProvider } from "./no-sparse-arrays.ts"
 import { NoThrowLiteralFixProvider } from "./no-throw-literal.ts"
@@ -59,6 +61,7 @@ export function getAllFixProviders(): FixProvider[] {
         new PreferConstFixProvider(),
         new NoProcessGlobalFixProvider(),
         new NoNodeGlobalsFixProvider(),
+        new NoSetterReturnFixProvider(),
         new NoSloppyImportsFixProvider(),
         new NoSparseArraysFixProvider(),
         new NoThrowLiteralFixProvider(),
