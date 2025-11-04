@@ -2,7 +2,7 @@ import * as vscode from "vscode"
 
 import { BaseProvider } from "./base.ts"
 
-// Supported languages for Deno formatter
+// Supported languages for Deno Formatter
 export const SUPPORTED_LANGUAGES = [
     // TypeScript variants
     { scheme: "file", language: "typescript" },
@@ -105,7 +105,7 @@ export class DocumentFormattingEditProvider extends BaseProvider
             const formattedText = await this.runFormat(document, token)
             return this.createTextEdit(document, formattedText)
         } catch (error) {
-            console.error(`Deno formatter error: ${error}`)
+            console.error(`Deno Formatter error: ${error}`)
             throw error
         }
     }
@@ -130,7 +130,7 @@ export class DocumentFormattingEditProvider extends BaseProvider
         })
 
         if (stderr) {
-            this.outputChannel.appendLine(`Deno formatter failed: ${stderr}`)
+            this.outputChannel.appendLine(`Deno Formatter failed: ${stderr}`)
             this.outputChannel.show()
         } else {
             this.outputChannel.appendLine(`Formatted ${document.fileName}`)

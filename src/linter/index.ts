@@ -16,7 +16,7 @@ interface DenoConfig {
     }
 }
 
-// Supported languages for Deno linter
+// Supported languages for Deno Linter
 export const LINTING_SUPPORTED_LANGUAGES = [
     { scheme: "file", language: "typescript" },
     { scheme: "file", language: "typescriptreact" },
@@ -38,6 +38,11 @@ interface LintMessage {
     code: string
     hint?: string
     docs?: string
+}
+
+interface LintError {
+    file_path: string
+    message: string
 }
 
 export class LintingProvider extends BaseProvider implements vscode.CodeActionProvider {
@@ -168,7 +173,7 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
                 )
             }
         } catch (error) {
-            this.outputChannel.appendLine(`Deno linter failed: ${error}`)
+            this.outputChannel.appendLine(`Deno Linter failed: ${error}`)
             this.outputChannel.show()
             this.diagnosticsCollection.clear()
         }
@@ -217,6 +222,25 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
         try {
             const result = JSON.parse(output)
             const diagnostics: LintMessage[] = result.diagnostics || []
+            const errors = result.errors || []
+
+            // Handle linter errors and report them to the user
+            if (errors.length > 0) {
+                for (const error of errors) {
+                    const errorMessage = `Deno Linter error in ${error.file_path}: ${error.message}`
+                    this.outputChannel.appendLine(errorMessage)
+
+                    // Also show a user-visible error message for critical failures
+                    vscode.window.showErrorMessage(
+                        `Deno Linter failed: ${error.message}`,
+                        "Show Output",
+                    ).then((selection) => {
+                        if (selection === "Show Output") {
+                            this.outputChannel.show()
+                        }
+                    })
+                }
+            }
 
             return diagnostics.map((msg) => {
                 msg.docs ??= "https://docs.deno.com/lint/rules/" + msg.code
