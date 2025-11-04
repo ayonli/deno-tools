@@ -4,9 +4,8 @@
     "description": "Use Deno tools, such as formatter and linter, without the baggage of Deno LSP.",
     "version": "0.1.0",
     "publisher": "ayonli",
-    "author": {
-        "name": "ayonli"
-    },
+    "author": "A-yon Lee <the@ayon.li>",
+    "icon": "icon.png",
     "license": "MIT",
     "repository": {
         "type": "git",
