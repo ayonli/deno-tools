@@ -21,6 +21,7 @@ export { NoImportAssertionsFixProvider } from "./no-import-assertions.ts"
 export { NoFallthroughFixProvider } from "./no-fallthrough.ts"
 export { NoNewSymbolFixProvider } from "./no-new-symbol.ts"
 export { NoNonNullAssertedOptionalChainFixProvider } from "./no-non-null-asserted-optional-chain.ts"
+export { NoOctalFixProvider } from "./no-octal.ts"
 export { NoVarFixProvider } from "./no-var.ts"
 export { NoUselessRenameFixProvider } from "./no-useless-rename.ts"
 export { RequireAwaitFixProvider } from "./require-await.ts"
@@ -46,6 +47,7 @@ import { NoImportAssertionsFixProvider } from "./no-import-assertions.ts"
 import { NoFallthroughFixProvider } from "./no-fallthrough.ts"
 import { NoNewSymbolFixProvider } from "./no-new-symbol.ts"
 import { NoNonNullAssertedOptionalChainFixProvider } from "./no-non-null-asserted-optional-chain.ts"
+import { NoOctalFixProvider } from "./no-octal.ts"
 import { NoVarFixProvider } from "./no-var.ts"
 import { NoUselessRenameFixProvider } from "./no-useless-rename.ts"
 import { RequireAwaitFixProvider } from "./require-await.ts"
@@ -74,6 +76,7 @@ export function getAllFixProviders(): FixProvider[] {
         new NoFallthroughFixProvider(),
         new NoNewSymbolFixProvider(),
         new NoNonNullAssertedOptionalChainFixProvider(),
+        new NoOctalFixProvider(),
         new NoVarFixProvider(),
         new NoUselessRenameFixProvider(),
         new RequireAwaitFixProvider(),
