@@ -44,7 +44,7 @@ export abstract class BaseFixProvider implements FixProvider {
     /**
      * Extract hint from diagnostic related information
      */
-    protected extractHint(diagnostic: vscode.Diagnostic): string | null {
+    extractHint(diagnostic: vscode.Diagnostic): string | null {
         if (diagnostic.relatedInformation && diagnostic.relatedInformation.length > 0) {
             const hintInfo = diagnostic.relatedInformation.find((info) =>
                 HINT_PREFIX.test(info.message)
@@ -59,7 +59,7 @@ export abstract class BaseFixProvider implements FixProvider {
     /**
      * Create a quick fix action with common properties
      */
-    protected createAction(
+    createAction(
         title: string,
         kind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix,
     ): vscode.CodeAction {

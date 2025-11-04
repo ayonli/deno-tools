@@ -32,6 +32,7 @@ export { RequireAwaitFixProvider } from "./require-await.ts"
 export { RequireYieldFixProvider } from "./require-yield.ts"
 export { VerbatimModuleSyntaxFixProvider } from "./verbatim-module-syntax.ts"
 export { BanTypesFixProvider } from "./ban-types.ts"
+export { BanUnknownRuleCodeFixProvider } from "./ban-unknown-rule-code.ts"
 export { GeneralFixProvider } from "./general.ts"
 export { DisableRuleFixProvider } from "./disable-rule.ts"
 
@@ -62,6 +63,7 @@ import { RequireAwaitFixProvider } from "./require-await.ts"
 import { RequireYieldFixProvider } from "./require-yield.ts"
 import { VerbatimModuleSyntaxFixProvider } from "./verbatim-module-syntax.ts"
 import { BanTypesFixProvider } from "./ban-types.ts"
+import { BanUnknownRuleCodeFixProvider } from "./ban-unknown-rule-code.ts"
 import { GeneralFixProvider } from "./general.ts"
 import { DisableRuleFixProvider } from "./disable-rule.ts"
 
@@ -95,6 +97,7 @@ export function getAllFixProviders(): FixProvider[] {
         new RequireYieldFixProvider(),
         new VerbatimModuleSyntaxFixProvider(),
         new BanTypesFixProvider(),
+        new BanUnknownRuleCodeFixProvider(),
         new GeneralFixProvider(), // Should be last as it's a fallback
     ]
 }

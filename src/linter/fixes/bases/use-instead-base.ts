@@ -37,10 +37,10 @@ export class UseInsteadHelper {
         replacement: string,
     ): vscode.CodeAction {
         // Access protected method through any cast
-        const action = (provider as any).createAction(`Use \`${replacement}\` instead`)
+        const action = provider.createAction(`Use \`${replacement}\` instead`)
         const edit = new vscode.WorkspaceEdit()
         edit.replace(document.uri, diagnostic.range, replacement)
-        
+
         action.edit = edit
         action.diagnostics = [diagnostic]
         return action
@@ -59,7 +59,7 @@ export class UseInsteadHelper {
         document: vscode.TextDocument,
     ): vscode.CodeAction | null {
         // Access protected method through any cast
-        const hint = (provider as any).extractHint(diagnostic)
+        const hint = provider.extractHint(diagnostic)
         if (!hint) {
             return null
         }

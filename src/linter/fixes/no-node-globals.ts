@@ -34,6 +34,4 @@ export class NoNodeGlobalsFixProvider extends ImportFixProviderBase {
 
         return actions
     }
-
-
 }
