@@ -10,6 +10,7 @@ export { NoUnusedVarsFixProvider } from "./no-unused-vars.ts"
 export { PreferConstFixProvider } from "./prefer-const.ts"
 export { NoProcessGlobalFixProvider } from "./no-process-global.ts"
 export { NoNodeGlobalsFixProvider } from "./no-node-globals.ts"
+export { NoThrowLiteralFixProvider } from "./no-throw-literal.ts"
 export { EqeqeqFixProvider } from "./eqeqeq.ts"
 export { NoCaseDeclarationsFixProvider } from "./no-case-declarations.ts"
 export { NoImportAssertionsFixProvider } from "./no-import-assertions.ts"
@@ -30,6 +31,7 @@ import { NoUnusedVarsFixProvider } from "./no-unused-vars.ts"
 import { PreferConstFixProvider } from "./prefer-const.ts"
 import { NoProcessGlobalFixProvider } from "./no-process-global.ts"
 import { NoNodeGlobalsFixProvider } from "./no-node-globals.ts"
+import { NoThrowLiteralFixProvider } from "./no-throw-literal.ts"
 import { EqeqeqFixProvider } from "./eqeqeq.ts"
 import { NoCaseDeclarationsFixProvider } from "./no-case-declarations.ts"
 import { NoImportAssertionsFixProvider } from "./no-import-assertions.ts"
@@ -53,6 +55,7 @@ export function getAllFixProviders(): FixProvider[] {
         new PreferConstFixProvider(),
         new NoProcessGlobalFixProvider(),
         new NoNodeGlobalsFixProvider(),
+        new NoThrowLiteralFixProvider(),
         new EqeqeqFixProvider(),
         new NoCaseDeclarationsFixProvider(),
         new NoImportAssertionsFixProvider(),
