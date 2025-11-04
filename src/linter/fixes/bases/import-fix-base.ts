@@ -39,36 +39,37 @@ export abstract class ImportFixProviderBase extends BaseFixProvider {
     }
 
     protected findImportInsertPosition(document: vscode.TextDocument): vscode.Position {
-        let lastImportLine = -1
-        let firstNonCommentLine = 0
+        let insertLine = 0
+        let inBlockComment = false
 
+        // Find the first line that's not a leading comment or empty line
         for (let i = 0; i < document.lineCount; i++) {
             const line = document.lineAt(i)
             const trimmedText = line.text.trim()
 
-            // Skip empty lines and comments at the beginning
+            // Handle block comments
+            if (!inBlockComment && trimmedText.includes("/*")) {
+                inBlockComment = true
+            }
+            if (inBlockComment) {
+                if (trimmedText.includes("*/")) {
+                    inBlockComment = false
+                }
+                continue
+            }
+
+            // Skip empty lines, single-line comments, and shebang lines at the beginning
             if (
-                trimmedText === "" || trimmedText.startsWith("//") || trimmedText.startsWith("/*")
+                trimmedText === "" || trimmedText.startsWith("//") || trimmedText.startsWith("#!")
             ) {
                 continue
             }
 
-            // Check if this is an import statement or re-export statement (not a regular export)
-            if (
-                trimmedText.startsWith("import ") ||
-                (trimmedText.startsWith("export ") &&
-                    (trimmedText.includes(" from ") || trimmedText.startsWith("export {") ||
-                        trimmedText.startsWith("export *")))
-            ) {
-                lastImportLine = i
-            } else if (firstNonCommentLine === 0) {
-                firstNonCommentLine = i
-                break
-            }
+            // This is the first line that's not a leading comment, shebang, or empty
+            insertLine = i
+            break
         }
 
-        // Insert after the last import, or at the beginning if no imports found
-        const insertLine = lastImportLine >= 0 ? lastImportLine + 1 : firstNonCommentLine
         return new vscode.Position(insertLine, 0)
     }
 
@@ -86,21 +87,16 @@ export abstract class ImportFixProviderBase extends BaseFixProvider {
             return false
         }
 
-        // Check the line at the insertion position (this will be the first line after imports)
+        // Check the line at the insertion position (this will be the first non-comment line)
         const lineAtInsert = document.lineAt(insertLine)
         const trimmedText = lineAtInsert.text.trim()
 
-        // If the line after insertion position is empty, we don't need another blank line
+        // If the line at insertion position is empty, we don't need a blank line
         if (trimmedText === "") {
             return false
         }
 
-        // If the line after insertion is a comment, we don't need a blank line
-        if (trimmedText.startsWith("//") || trimmedText.startsWith("/*")) {
-            return false
-        }
-
-        // If the line after insertion is another import, we don't need a blank line
+        // If the line at insertion is already an import, we don't need a blank line
         if (
             trimmedText.startsWith("import ") ||
             (trimmedText.startsWith("export ") &&
@@ -110,8 +106,7 @@ export abstract class ImportFixProviderBase extends BaseFixProvider {
             return false
         }
 
-        // If we reach here, the line after insertion is actual code, so we need a blank line
-        // This applies whether we're inserting the first import or after existing imports
+        // If we reach here, the line at insertion is actual code, so we need a blank line
         return true
     }
 }
