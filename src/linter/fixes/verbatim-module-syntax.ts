@@ -27,9 +27,7 @@ export class VerbatimModuleSyntaxFixProvider extends BaseFixProvider {
                 document,
                 "Add `type` keyword",
             )
-            if (addTypeAction) {
-                actions.push(addTypeAction)
-            }
+            actions.push(addTypeAction)
         }
 
         if (/`import`\s+to\s+`import\s+type`/.test(hint)) {
@@ -50,7 +48,7 @@ export class VerbatimModuleSyntaxFixProvider extends BaseFixProvider {
         diagnostic: vscode.Diagnostic,
         document: vscode.TextDocument,
         title: string,
-    ): vscode.CodeAction | null {
+    ): vscode.CodeAction {
         const action = this.createAction(title)
         const edit = new vscode.WorkspaceEdit()
 

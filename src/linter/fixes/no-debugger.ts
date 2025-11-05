@@ -16,9 +16,7 @@ export class NoDebuggerFixProvider extends BaseFixProvider {
         const actions: vscode.CodeAction[] = []
 
         const removeDebuggerAction = this.createRemoveDebuggerAction(diagnostic, document)
-        if (removeDebuggerAction) {
-            actions.push(removeDebuggerAction)
-        }
+        actions.push(removeDebuggerAction)
 
         return actions
     }
@@ -29,7 +27,7 @@ export class NoDebuggerFixProvider extends BaseFixProvider {
     private createRemoveDebuggerAction(
         diagnostic: vscode.Diagnostic,
         document: vscode.TextDocument,
-    ): vscode.CodeAction | null {
+    ): vscode.CodeAction {
         const action = this.createAction("Remove `debugger` statement")
 
         const edit = new vscode.WorkspaceEdit()

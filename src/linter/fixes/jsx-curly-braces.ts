@@ -23,14 +23,10 @@ export class JsxCurlyBracesFixProvider extends BaseFixProvider {
         // Determine the type of fix needed based on the diagnostic content
         if (this.needsAddBraces(diagnosticText)) {
             const addBracesAction = this.createAddBracesAction(diagnostic, document)
-            if (addBracesAction) {
-                actions.push(addBracesAction)
-            }
+            actions.push(addBracesAction)
         } else if (this.needsRemoveBraces(diagnosticText)) {
             const removeBracesAction = this.createRemoveBracesAction(diagnostic, document)
-            if (removeBracesAction) {
-                actions.push(removeBracesAction)
-            }
+            actions.push(removeBracesAction)
         }
 
         return actions
@@ -58,7 +54,7 @@ export class JsxCurlyBracesFixProvider extends BaseFixProvider {
     private createAddBracesAction(
         diagnostic: vscode.Diagnostic,
         document: vscode.TextDocument,
-    ): vscode.CodeAction | null {
+    ): vscode.CodeAction {
         const action = this.createAction("Add curly braces around the JSX expression")
 
         const edit = new vscode.WorkspaceEdit()
@@ -80,7 +76,7 @@ export class JsxCurlyBracesFixProvider extends BaseFixProvider {
     private createRemoveBracesAction(
         diagnostic: vscode.Diagnostic,
         document: vscode.TextDocument,
-    ): vscode.CodeAction | null {
+    ): vscode.CodeAction {
         const action = this.createAction("Remove unnecessary curly braces")
 
         const edit = new vscode.WorkspaceEdit()
