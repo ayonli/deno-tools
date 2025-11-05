@@ -166,15 +166,8 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
         try {
             const diagnostics = await this.runLint(document, fix)
             this.diagnosticsCollection.set(document.uri, diagnostics)
-
-            if (diagnostics.length > 0) {
-                this.outputChannel.appendLine(
-                    `Found ${diagnostics.length} lint issues in ${document.fileName}`,
-                )
-            }
         } catch (error) {
             this.outputChannel.appendLine(`Deno Linter failed: ${error}`)
-            this.outputChannel.show()
             this.diagnosticsCollection.clear()
         }
     }
@@ -201,7 +194,7 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
             this.outputChannel.appendLine(stdout)
         }
 
-        return this.parseLintOutput(stdout, document)
+        return this.parseLintOutput(stdout, document, fix)
     }
 
     private addConfigIfFound(
@@ -214,7 +207,11 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
         }
     }
 
-    private parseLintOutput(output: string, document: vscode.TextDocument): vscode.Diagnostic[] {
+    private parseLintOutput(
+        output: string,
+        document: vscode.TextDocument,
+        showErrorPopup = false,
+    ): vscode.Diagnostic[] {
         if (!output.trim()) {
             return []
         }
@@ -230,15 +227,16 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
                     const errorMessage = `Deno Linter error in ${error.file_path}: ${error.message}`
                     this.outputChannel.appendLine(errorMessage)
 
-                    // Also show a user-visible error message for critical failures
-                    vscode.window.showErrorMessage(
-                        `Deno Linter failed: ${error.message}`,
-                        "Show Output",
-                    ).then((selection) => {
-                        if (selection === "Show Output") {
-                            this.outputChannel.show()
-                        }
-                    })
+                    if (showErrorPopup) {
+                        vscode.window.showErrorMessage(
+                            `Deno Linter failed: ${error.message}`,
+                            "Show Output",
+                        ).then((selection) => {
+                            if (selection === "Show Output") {
+                                this.outputChannel.show()
+                            }
+                        })
+                    }
                 }
             }
 
