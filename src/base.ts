@@ -185,6 +185,13 @@ export abstract class BaseProvider implements vscode.Disposable {
             ? path.relative(workspaceFolder.uri.fsPath, fileUri.fsPath)
             : fileUri.fsPath
 
+        if (
+            contains(relativePath, "node_modules") ||
+            contains(relativePath, ".git")
+        ) {
+            return false
+        }
+
         // Get tool-specific patterns only (no fallback to global patterns)
         let includePatterns: string[] = []
         let excludePatterns: string[] = []
