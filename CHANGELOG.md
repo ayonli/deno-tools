@@ -5,6 +5,15 @@ All notable changes to the "Deno Tools" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-11-05
+
+### 🔧 Enhanced
+
+#### Linting Improvements
+
+- **Auto-ignore system directories**: The linter now automatically ignores `node_modules` and `.git` directories, improving performance and reducing unnecessary diagnostics.
+- **Enhanced quick fix for `no-explicit-any`**: Added "Remove type assertion" action when the `no-explicit-any` rule is violated, providing more precise refactoring options.
+
 ## [0.1.0] - 2025-11-03
 
 ### 🎉 Initial Release

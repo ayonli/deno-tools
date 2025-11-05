@@ -30,6 +30,20 @@ in your project hierarchy and falls back to the user's home directory.
 
 - **Fix Current File**: Apply all available auto-fixes to the current file (`Deno Tools: Fix Current File`).
 
+## 🎆 Screenshots
+
+### Integrated Code Formatter
+
+![Formatter](screenshots/formatter.png)
+
+### Real-time Linting Diagnostics
+
+![Live Diagnostics](screenshots/live-diagnostics.png)
+
+### Quick Fix Actions
+
+![Quick Fixes](screenshots/quick-fixes.png)
+
 ## 🚀 Quick Start
 
 1. **Install Deno**: Make sure [Deno](https://deno.land/) is installed on your system.
