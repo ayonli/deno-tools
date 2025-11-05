@@ -31,6 +31,12 @@ interface DenoConfig {
     }
 }
 
+interface ConfigCache {
+    config: DenoConfig
+    lastModified: number
+    filePath: string
+}
+
 /**
  * Shared resources manager for all tools
  */
@@ -38,11 +44,15 @@ class ToolsSharedResources {
     private static instance: ToolsSharedResources | undefined
     private outputChannel: vscode.OutputChannel
     private configChangeListener?: vscode.Disposable
+    private fileWatcher?: vscode.FileSystemWatcher
     private providers: Set<BaseProvider> = new Set()
+    private configCache = new Map<string, ConfigCache>()
+    private configPathCache = new Map<string, string | null>()
 
     private constructor() {
         this.outputChannel = vscode.window.createOutputChannel("Deno Tools")
         this.setupConfigurationWatcher()
+        this.setupFileWatcher()
     }
 
     public static getInstance(): ToolsSharedResources {
@@ -66,8 +76,11 @@ class ToolsSharedResources {
 
     public dispose(): void {
         this.configChangeListener?.dispose()
+        this.fileWatcher?.dispose()
         this.outputChannel.dispose()
         this.providers.clear()
+        this.configCache.clear()
+        this.configPathCache.clear()
     }
 
     public static disposeSharedResources(): void {
@@ -98,6 +111,74 @@ class ToolsSharedResources {
                 }
             }
         })
+    }
+
+    private setupFileWatcher(): void {
+        // Watch for changes to deno.json and deno.jsonc files
+        this.fileWatcher = vscode.workspace.createFileSystemWatcher("**/deno.{json,jsonc}")
+
+        // Clear cache when config files are created, changed, or deleted
+        this.fileWatcher.onDidCreate((uri) => this.invalidateConfigCache(uri.fsPath))
+        this.fileWatcher.onDidChange((uri) => this.invalidateConfigCache(uri.fsPath))
+        this.fileWatcher.onDidDelete((uri) => this.invalidateConfigCache(uri.fsPath))
+    }
+
+    private invalidateConfigCache(filePath: string): void {
+        // Remove the specific config from cache
+        this.configCache.delete(filePath)
+
+        // Also clear any cached configs that might depend on this one
+        // (e.g., if a parent directory config was deleted, child directories might need to use a different config)
+        this.configCache.clear()
+
+        // Clear config path cache as well since file structure changed
+        this.configPathCache.clear()
+
+        console.log(`🔄 CACHE: Invalidated config cache due to changes in ${filePath}`)
+    }
+    public getCachedConfig(configPath: string): DenoConfig | null {
+        const cached = this.configCache.get(configPath)
+        if (!cached) {
+            return null
+        }
+
+        try {
+            const stats = fs.statSync(configPath)
+            if (stats.mtimeMs === cached.lastModified) {
+                console.log(`⚡ CACHE: Using cached config for ${configPath}`)
+                return cached.config
+            }
+
+            // File was modified, remove from cache
+            this.configCache.delete(configPath)
+            return null
+        } catch {
+            // File doesn't exist anymore, remove from cache
+            this.configCache.delete(configPath)
+            return null
+        }
+    }
+
+    public setCachedConfig(configPath: string, config: DenoConfig): void {
+        try {
+            const stats = fs.statSync(configPath)
+            this.configCache.set(configPath, {
+                config,
+                lastModified: stats.mtimeMs,
+                filePath: configPath,
+            })
+        } catch {
+            // If we can't stat the file, don't cache it
+            console.error(`Failed to cache config for ${configPath}`)
+        }
+    }
+
+    public getCachedConfigPath(documentUri: string): string | null | undefined {
+        return this.configPathCache.get(documentUri)
+    }
+
+    public setCachedConfigPath(documentUri: string, configPath: string | null): void {
+        this.configPathCache.set(documentUri, configPath)
     }
 }
 
@@ -160,17 +241,30 @@ export abstract class BaseProvider implements vscode.Disposable {
     }
 
     /**
-     * Parse the Deno configuration file
+     * Parse the Deno configuration file with caching
      */
     protected parseDenoConfig(configPath: string): DenoConfig {
+        // Try to get from cache first
+        const cached = this.sharedResources.getCachedConfig(configPath)
+        if (cached) {
+            return cached
+        }
+
+        // Not in cache or outdated, read and parse
         const content = fs.readFileSync(configPath, "utf-8")
+        let config: DenoConfig
 
         // Handle both .json and .jsonc files
         if (configPath.endsWith(".jsonc")) {
-            return parseJsonc(content) as DenoConfig
+            config = parseJsonc(content) as DenoConfig
         } else {
-            return JSON.parse(content) as DenoConfig
+            config = JSON.parse(content) as DenoConfig
         }
+
+        // Cache the parsed config
+        this.sharedResources.setCachedConfig(configPath, config)
+        console.log(`📁 CONFIG: Parsed and cached ${configPath}`)
+        return config
     }
 
     /**
@@ -303,11 +397,21 @@ export abstract class BaseProvider implements vscode.Disposable {
     }
 
     /**
-     * Find configuration file (deno.json or deno.jsonc) for a document
+     * Find configuration file (deno.json or deno.jsonc) for a document with caching
      * Returns the path to the config file or null if not found
      */
     protected findDenoConfig(documentUri: vscode.Uri): string | null {
+        const cacheKey = documentUri.toString()
+
+        // Check cache first
+        const cached = this.sharedResources.getCachedConfigPath(cacheKey)
+        if (cached !== undefined) {
+            console.log(`⚡ CACHE: Using cached config path for ${documentUri.fsPath}`)
+            return cached
+        }
+
         const workspaceFolder = vscode.workspace.getWorkspaceFolder(documentUri)
+        let configPath: string | null = null
 
         if (workspaceFolder) {
             const currentDir = path.dirname(documentUri.fsPath)
@@ -316,14 +420,23 @@ export abstract class BaseProvider implements vscode.Disposable {
             // First search in project hierarchy
             const projectConfig = this.searchConfigInDirectories(currentDir, workspaceRoot)
             if (projectConfig) {
-                return projectConfig
+                configPath = projectConfig
             }
         }
 
-        // Fallback to home directory
-        const homeDir = os.homedir()
-        const homeConfig = this.findConfigInDirectory(homeDir)
-        return homeConfig
+        // Fallback to home directory if not found in project
+        if (!configPath) {
+            const homeDir = os.homedir()
+            configPath = this.findConfigInDirectory(homeDir)
+        }
+
+        // Cache the result (including null results to avoid repeated searches)
+        this.sharedResources.setCachedConfigPath(cacheKey, configPath)
+        console.log(
+            `📁 CONFIG PATH: Found and cached ${configPath || "null"} for ${documentUri.fsPath}`,
+        )
+
+        return configPath
     }
 
     /**

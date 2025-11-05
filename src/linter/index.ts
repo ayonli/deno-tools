@@ -39,6 +39,7 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
     private fixProviders: FixProvider[]
     private disableRuleProvider: FixProvider
     private lintingTimers: Map<string, NodeJS.Timeout> = new Map()
+    private configChangeTimer?: NodeJS.Timeout
     private documentChangeListener?: vscode.Disposable
     private documentOpenListener?: vscode.Disposable
     private documentSaveListener?: vscode.Disposable
@@ -80,12 +81,32 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
 
     protected onEnable(): void {
         this.setupFileWatchers()
-        // Re-lint all open documents
-        vscode.workspace.textDocuments.forEach((document) => {
-            if (this.isSupportedDocument(document)) {
-                this.lintDocument(document)
+
+        // Re-lint all open documents with batching to avoid performance spikes
+        const supportedDocuments = vscode.workspace.textDocuments.filter((doc) =>
+            this.isSupportedDocument(doc)
+        )
+
+        if (supportedDocuments.length > 0) {
+            console.log(`🔍 LINTER: Linting ${supportedDocuments.length} open documents`)
+
+            // Process in small batches with delays to avoid blocking the UI
+            const batchSize = 5
+            let index = 0
+
+            const processBatch = () => {
+                const batch = supportedDocuments.slice(index, index + batchSize)
+                batch.forEach((document) => this.lintDocument(document))
+
+                index += batchSize
+                if (index < supportedDocuments.length) {
+                    setTimeout(processBatch, 50) // Small delay between batches
+                }
             }
-        })
+
+            // Start processing with a small initial delay
+            setTimeout(processBatch, 100)
+        }
     }
 
     protected onDisable(): void {
@@ -99,6 +120,12 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
         this.disposeFileWatchers()
         this.lintingTimers.forEach((timer) => clearTimeout(timer))
         this.lintingTimers.clear()
+
+        if (this.configChangeTimer) {
+            clearTimeout(this.configChangeTimer)
+            this.configChangeTimer = undefined
+        }
+
         this.diagnosticsCollection.dispose()
     }
 
@@ -493,14 +520,23 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
             this.diagnosticsCollection.delete(document.uri)
         })
 
-        // Listen for linter-specific configuration changes
+        // Listen for linter-specific configuration changes with debouncing
         this.linterConfigChangeListener = vscode.workspace.onDidChangeConfiguration((event) => {
             if (
                 event.affectsConfiguration("deno-tools.linter.lintOnChange") ||
                 event.affectsConfiguration("deno-tools.linter.debounceMs")
             ) {
-                // Refresh file watchers with new configuration
-                this.setupFileWatchers()
+                // Clear existing timer
+                if (this.configChangeTimer) {
+                    clearTimeout(this.configChangeTimer)
+                }
+
+                // Debounce configuration changes to avoid rapid re-setup
+                this.configChangeTimer = setTimeout(() => {
+                    console.log("🔧 LINTER: Refreshing file watchers due to config change")
+                    this.setupFileWatchers()
+                    this.configChangeTimer = undefined
+                }, 500)
             }
         })
     }

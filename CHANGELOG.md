@@ -11,12 +11,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Formatter Improvements
 
-- **Respect `exclude` configurations**: The formatter now respects `include` and `exclude` settings in `deno.json`, but with user-friendly warnings when trying to format excluded files.
+- **Respect `fmt.exclude` patterns**: The formatter now properly respects `fmt.exclude` patterns from `deno.json`/`deno.jsonc` configuration files instead of silently ignoring them.
+- **User-friendly exclusion warnings**: When attempting to format a file excluded by `fmt.exclude` patterns, the extension shows a clear warning message explaining why the file wasn't formatted.
 - **Configurable warning behavior**: Added `deno-tools.formatter.warnOnExclude` setting (default: `true`) to control whether to show warnings for excluded files. Users can disable warnings via a "Don't show again" option.
+- **Consistent exclusion logic**: Refactored exclusion checking logic to the base class, ensuring both formatter and linter handle include/exclude patterns consistently.
+
+### ⚡ Performance
+
+#### Major Performance Optimizations
+
+- **Intelligent config caching**: Implemented smart caching for `deno.json`/`deno.jsonc` files to avoid repeated file reads and parsing during formatting/linting operations.
+- **Configuration path caching**: Added intelligent caching for config file path lookups to eliminate repeated directory tree traversals.
+- **File system monitoring**: Added file watcher to automatically invalidate cache when configuration files are created, modified, or deleted.
+- **Batched document processing**: Re-linting on enable now processes documents in small batches with delays to prevent UI blocking.
+- **Debounced config changes**: Added debouncing to configuration change handlers to prevent rapid re-initialization.
 
 ### 🔧 Technical Improvements
 
-- **Reduced code duplication**: Moved shared exclusion logic from individual tools to the base class for better maintainability.
+- **Reduced I/O operations**: Configuration files are now read only once per modification, significantly improving performance for frequent formatting/linting actions.
+- **Reduced file system calls**: Config path searches are now cached and only performed once per document until invalidated.
+- **Memory efficiency**: Cache tracks file modification times to ensure configs are always up-to-date while minimizing disk I/O.
+- **Improved error handling**: Enhanced graceful fallback when configuration files cannot be read.
+- **Smoother UX**: Large numbers of open documents are processed gradually to maintain editor responsiveness.
+- **Smart cache invalidation**: Both config content and path caches are properly invalidated when files change.
+- **Debug logging**: Added cache hit/miss logging for performance monitoring and debugging.
 
 ## [0.1.1] - 2025-11-05
 
