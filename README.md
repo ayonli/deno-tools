@@ -19,12 +19,13 @@ in your project hierarchy and falls back to the user's home directory.
 
 - **Built-in Integration**: Format documents using VS Code's standard formatting functionalities (Format Document, Format Selection, Format on Save, etc.).
 - **Multi-Language Support**: Supports TypeScript, JavaScript, JSX, TSX, JSON, JSONC, Markdown, HTML, CSS, SCSS, Sass, Less, Vue, Svelte, Astro, YAML, and SQL.
+- **Integrity**: Respects `include` and `exclude` settings in `deno.json`, but with user-friendly warnings when trying to format excluded files.
 
 ### 🔍 **Linting**
 
 - **Real-time Diagnostics**: Live linting with detailed diagnostics and helpful hints.
 - **Auto-fixes**: Quick fix actions for various rules.
-- **Integrity**: Respect `include` and `exclude` settings in `deno.json`.
+- **Integrity**: Respects `include` and `exclude` settings in `deno.json`.
 
 ### 🛠 **Commands**
 
@@ -79,12 +80,13 @@ in your project hierarchy and falls back to the user's home directory.
 
 This extension provides several configuration options accessible via VS Code settings:
 
-| Setting                          | Default     | Description                                                                                                                                |
-| -------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `deno-tools.enable`              | Auto-detect | Enable Deno tools. Can be `true` (all tools), `false` (no tools), or an array of specific tools: `['formatter', 'linter']`.                |
-| `deno-tools.linter.lintOnChange` | `true`      | Enable linting while typing (disable to only lint on save/manual triggers)                                                                 |
-| `deno-tools.linter.debounceMs`   | `1500`      | Debounce delay in milliseconds for linting after document changes (higher values = less interruption while typing)                         |
-| `deno-tools.linter.severity`     | `error`     | Default `error`, set to `warning` or `info` for VS Code to provide informative diagnostics but the rules are not enforced in CI pipelines. |
+| Setting                              | Default     | Description                                                                                                                                |
+| ------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `deno-tools.enable`                  | Auto-detect | Enable Deno tools. Can be `true` (all tools), `false` (no tools), or an array of specific tools: `['formatter', 'linter']`.                |
+| `deno-tools.formatter.warnOnExclude` | `true`      | Show a warning message when trying to format a file excluded by `fmt.exclude` patterns in `deno.json`/`deno.jsonc`                         |
+| `deno-tools.linter.lintOnChange`     | `true`      | Enable linting while typing (disable to only lint on save/manual triggers)                                                                 |
+| `deno-tools.linter.debounceMs`       | `1500`      | Debounce delay in milliseconds for linting after document changes (higher values = less interruption while typing)                         |
+| `deno-tools.linter.severity`         | `error`     | Default `error`, set to `warning` or `info` for VS Code to provide informative diagnostics but the rules are not enforced in CI pipelines. |
 
 ## 🎯 Supported Languages
 
@@ -117,6 +119,7 @@ Access these commands via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):
 - Use standard VS Code formatting shortcuts: `Shift+Alt+F` (Windows/Linux) or `Shift+Option+F` (macOS).
 - Right-click and select "Format Document" or "Format Selection".
 - Enable "Format on Save" in VS Code settings for automatic formatting.
+- Use `deno-tools.formatter.warnOnExclude` setting to control whether exclusion warnings should be displayed.
 
 ### Linting
 

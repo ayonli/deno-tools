@@ -121,6 +121,19 @@ suite("Formatter Unit Tests", () => {
             assert.strictEqual(result, "ts", "Unknown language should default to ts")
         })
     })
+
+    suite("Exclude Pattern Logic", () => {
+        test("Should support getRelativePath method", () => {
+            // Test that the getRelativePath method is accessible
+            // deno-lint-ignore no-explicit-any
+            const formatterAny = formatter as any
+            assert.strictEqual(
+                typeof formatterAny.getRelativePath,
+                "function",
+                "getRelativePath should be a function",
+            )
+        })
+    })
 })
 
 // Helper function to test the private getExtension method

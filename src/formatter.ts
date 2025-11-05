@@ -101,6 +101,12 @@ export class DocumentFormattingEditProvider extends BaseProvider
             return []
         }
 
+        // Check if the file is excluded by fmt.exclude patterns
+        const isExcluded = await this.checkIfFileExcluded(document.uri)
+        if (isExcluded) {
+            return []
+        }
+
         try {
             const formattedText = await this.runFormat(document, token)
             return this.createTextEdit(document, formattedText)
@@ -149,5 +155,48 @@ export class DocumentFormattingEditProvider extends BaseProvider
         )
 
         return [vscode.TextEdit.replace(fullRange, formattedText)]
+    }
+
+    private getRelativePath(fileUri: vscode.Uri): string {
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(fileUri)
+        if (workspaceFolder) {
+            return vscode.workspace.asRelativePath(fileUri, false)
+        }
+        return fileUri.fsPath
+    }
+
+    private async checkIfFileExcluded(documentUri: vscode.Uri): Promise<boolean> {
+        const shouldProcess = this.shouldProcessFile(documentUri)
+
+        if (shouldProcess) {
+            return false
+        }
+
+        await this.showExclusionWarning(documentUri)
+        return true
+    }
+
+    private async showExclusionWarning(documentUri: vscode.Uri): Promise<void> {
+        const configuration = vscode.workspace.getConfiguration("deno-tools")
+        const warnOnExclude = configuration.get<boolean>("formatter.warnOnExclude", true)
+
+        if (!warnOnExclude) {
+            return
+        }
+
+        const relativePath = this.getRelativePath(documentUri)
+        const action = await vscode.window.showWarningMessage(
+            `File "${relativePath}" is excluded from formatting by the deno.json/deno.jsonc configuration.`,
+            "Don't show again",
+            "OK",
+        )
+
+        if (action === "Don't show again") {
+            await configuration.update(
+                "formatter.warnOnExclude",
+                false,
+                vscode.ConfigurationTarget.Workspace,
+            )
+        }
     }
 }

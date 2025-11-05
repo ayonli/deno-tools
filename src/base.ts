@@ -226,6 +226,25 @@ export abstract class BaseProvider implements vscode.Disposable {
     }
 
     /**
+     * Check if a file should be processed based on Deno configuration include/exclude patterns
+     * Returns false if the file is excluded, true if it should be processed
+     */
+    protected shouldProcessFile(documentUri: vscode.Uri): boolean {
+        const configPath = this.findDenoConfig(documentUri)
+        if (!configPath) {
+            return true // If no config found, process the file
+        }
+
+        try {
+            const config = this.parseDenoConfig(configPath)
+            return this.matchesIncludeExclude(documentUri, config)
+        } catch (error) {
+            console.error(`Error checking Deno config: ${error}`)
+            return true // If there's an error, proceed with processing
+        }
+    }
+
+    /**
      * Check if a file path matches a glob pattern using minimatch
      */
     private matchesPattern(filePath: string, pattern: string): boolean {

@@ -5,17 +5,6 @@ import { type FixProvider, getAllFixProviders, getDisableRuleProvider } from "./
 
 import { BaseProvider } from "../base.ts"
 
-interface DenoConfig {
-    fmt?: {
-        include?: string[]
-        exclude?: string[]
-    }
-    lint?: {
-        include?: string[]
-        exclude?: string[]
-    }
-}
-
 // Supported languages for Deno Linter
 export const LINTING_SUPPORTED_LANGUAGES = [
     { scheme: "file", language: "typescript" },
@@ -138,24 +127,7 @@ export class LintingProvider extends BaseProvider implements vscode.CodeActionPr
             return false
         }
 
-        return this.shouldProcessFile(document)
-    }
-
-    /**
-     * Check if a file should be processed based on Deno configuration include/exclude patterns
-     */
-    private shouldProcessFile(document: vscode.TextDocument): boolean {
-        const configPath = this.findDenoConfig(document.uri)
-        if (!configPath) {
-            return true // If no config found, process the file
-        }
-
-        try {
-            const config = this.parseDenoConfig(configPath)
-            return this.matchesIncludeExclude(document.uri, config)
-        } catch {
-            return true
-        }
+        return this.shouldProcessFile(document.uri)
     }
 
     public async lintDocument(document: vscode.TextDocument, fix = false): Promise<void> {

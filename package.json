@@ -2,7 +2,7 @@
     "name": "deno-tools",
     "displayName": "Deno Tools",
     "description": "Use Deno tools, such as formatter and linter, without the baggage of Deno LSP.",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "publisher": "ayonli",
     "author": "A-yon Lee <the@ayon.li>",
     "icon": "icon.png",
@@ -74,6 +74,11 @@
                             "linter"
                         ]
                     }
+                },
+                "deno-tools.formatter.warnOnExclude": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show a warning message when trying to format a file that is excluded by the `fmt.exclude` patterns in deno.json/deno.jsonc"
                 },
                 "deno-tools.linter.lintOnChange": {
                     "type": "boolean",

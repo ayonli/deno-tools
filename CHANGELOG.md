@@ -5,6 +5,19 @@ All notable changes to the "Deno Tools" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2025-11-06
+
+### 🎨 Enhanced
+
+#### Formatter Improvements
+
+- **Respect `exclude` configurations**: The formatter now respects `include` and `exclude` settings in `deno.json`, but with user-friendly warnings when trying to format excluded files.
+- **Configurable warning behavior**: Added `deno-tools.formatter.warnOnExclude` setting (default: `true`) to control whether to show warnings for excluded files. Users can disable warnings via a "Don't show again" option.
+
+### 🔧 Technical Improvements
+
+- **Reduced code duplication**: Moved shared exclusion logic from individual tools to the base class for better maintainability.
+
 ## [0.1.1] - 2025-11-05
 
 ### 🔧 Enhanced
