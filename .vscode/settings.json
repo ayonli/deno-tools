@@ -1,3 +1,9 @@
 {
-    "deno-tools.enable": true
+    "deno-tools.enable": true,
+    "[typescript]": {
+        "editor.defaultFormatter": "ayonli.deno-tools"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "ayonli.deno-tools"
+    }
 }

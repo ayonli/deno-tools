@@ -83,12 +83,12 @@ suite("Deno Rules Extension Test Suite", () => {
 
     suite("Extension Activation Tests", () => {
         test("Extension should be present", () => {
-            const extension = vscode.extensions.getExtension("undefined_publisher.deno-tools")
+            const extension = vscode.extensions.getExtension("ayonli.deno-tools")
             assert.ok(extension, "Extension should be available")
         })
 
         test("Extension should activate", async () => {
-            const extension = vscode.extensions.getExtension("undefined_publisher.deno-tools")
+            const extension = vscode.extensions.getExtension("ayonli.deno-tools")
             if (extension) {
                 await extension.activate()
                 assert.ok(extension.isActive, "Extension should be active")
