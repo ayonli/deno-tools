@@ -5,6 +5,16 @@ All notable changes to the "Deno Tools" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2025-11-08
+
+### 🔧 Enhanced
+
+#### Linting Improvements
+
+- **Quick fix for `camelcase` rule**: Added automatic fix to rename snake_case identifiers to camelCase following Deno's suggestions.
+- **Quick fix for `constructor-super` rule**: Added automatic fix to remove invalid `super()` calls in constructors.
+- **Quick fix for `jsx-no-comment-text-nodes` rule**: Added automatic fix to wrap JSX block comments (`/* ... */`) in curly braces to prevent them from being rendered as text nodes.
+
 ## [0.1.2] - 2025-11-06
 
 ### 🎨 Enhanced

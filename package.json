@@ -2,7 +2,7 @@
     "name": "deno-tools",
     "displayName": "Deno Tools",
     "description": "Use Deno tools, such as formatter and linter, without the baggage of Deno LSP.",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "publisher": "ayonli",
     "author": "A-yon Lee <the@ayon.li>",
     "icon": "icon.png",
