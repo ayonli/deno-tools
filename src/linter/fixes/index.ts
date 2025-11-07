@@ -41,6 +41,7 @@ export { BanUnusedIgnoreFixProvider } from "./ban-unused-ignore.ts"
 export { JsxBooleanValueFixProvider } from "./jsx-boolean-value.ts"
 export { JsxCurlyBracesFixProvider } from "./jsx-curly-braces.ts"
 export { JsxNoUselessFragmentFixProvider } from "./jsx-no-useless-fragment.ts"
+export { JsxNoCommentTextNodesFixProvider } from "./jsx-no-comment-text-nodes.ts"
 export { CamelcaseFixProvider } from "./camelcase.ts"
 export { ConstructorSuperFixProvider } from "./constructor-super.ts"
 export { GeneralFixProvider } from "./general.ts"
@@ -82,6 +83,7 @@ import { BanUnusedIgnoreFixProvider } from "./ban-unused-ignore.ts"
 import { JsxBooleanValueFixProvider } from "./jsx-boolean-value.ts"
 import { JsxCurlyBracesFixProvider } from "./jsx-curly-braces.ts"
 import { JsxNoUselessFragmentFixProvider } from "./jsx-no-useless-fragment.ts"
+import { JsxNoCommentTextNodesFixProvider } from "./jsx-no-comment-text-nodes.ts"
 import { CamelcaseFixProvider } from "./camelcase.ts"
 import { ConstructorSuperFixProvider } from "./constructor-super.ts"
 import { GeneralFixProvider } from "./general.ts"
@@ -126,6 +128,7 @@ export function getAllFixProviders(): FixProvider[] {
         new JsxBooleanValueFixProvider(),
         new JsxCurlyBracesFixProvider(),
         new JsxNoUselessFragmentFixProvider(),
+        new JsxNoCommentTextNodesFixProvider(),
         new CamelcaseFixProvider(),
         new ConstructorSuperFixProvider(),
         new GeneralFixProvider(), // Should be last as it's a fallback
